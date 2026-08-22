@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Maximize2, X } from "lucide-react";
 import { useState } from "react";
 
 export function ImageGallery({
@@ -38,6 +38,15 @@ export function ImageGallery({
           alt={`${title} - view ${selectedIndex + 1}`}
           className="h-full w-full object-cover transition-all duration-300"
         />
+
+        <button
+          type="button"
+          onClick={() => setIsLightbox(true)}
+          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/45 text-white opacity-0 backdrop-blur-md transition-opacity hover:bg-black/70 group-hover:opacity-100"
+          aria-label="Open full-screen image"
+        >
+          <Maximize2 className="h-4 w-4" />
+        </button>
 
         {/* Carousel controls */}
         {images.length > 1 && (
@@ -85,6 +94,52 @@ export function ImageGallery({
               />
             </button>
           ))}
+        </div>
+      )}
+
+      {isLightbox && (
+        <div
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/95 p-4 backdrop-blur"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${title} image viewer`}
+        >
+          <button
+            type="button"
+            onClick={() => setIsLightbox(false)}
+            className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+            aria-label="Close image viewer"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          {images.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={prevImage}
+                className="absolute left-4 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 sm:left-8"
+                aria-label="Previous image"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+              <button
+                type="button"
+                onClick={nextImage}
+                className="absolute right-4 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 sm:right-8"
+                aria-label="Next image"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+            </>
+          )}
+          <img
+            src={images[selectedIndex]}
+            alt={`${title} - enlarged view ${selectedIndex + 1}`}
+            className="max-h-[88vh] max-w-[90vw] rounded-2xl object-contain shadow-2xl"
+          />
+          <div className="absolute bottom-5 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white">
+            {selectedIndex + 1} / {images.length}
+          </div>
         </div>
       )}
     </div>

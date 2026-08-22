@@ -3,6 +3,7 @@
 // ============================================================
 
 import { create } from "zustand";
+import { scanChatMessage } from "@/lib/chatSafety";
 
 export interface ChatMessage {
   id: string;
@@ -36,7 +37,7 @@ const AI_RESPONSES: Record<string, string[]> = {
   payment: [
     "I can help you with payment issues. What seems to be the problem?\n\n1️⃣ Failed payment\n2️⃣ Refund request\n3️⃣ Deposit return\n4️⃣ Late fee dispute\n5️⃣ Transaction history",
     "I can see your recent transactions. Your last payment of ₹2,625 was processed successfully on Aug 16. Your security deposit of ₹5,000 is being held and will be released upon item return.\n\nWould you like me to help with a specific transaction?",
-    "I've initiated the refund process for ₹500. It will be credited to your original payment method within 3-5 business days.\n\n📧 Confirmation email sent to arjun.mehta@bmu.edu.in\n\nIs there anything else I can help with?",
+    "I've initiated the refund process for ₹500. It will be credited to your original payment method within 3-5 business days.\n\n🔔 A private confirmation was added to your in-app notifications.\n\nIs there anything else I can help with?",
   ],
   general: [
     "Hi! I'm your CampusLend AI assistant. I can help you with:\n\n🔧 Damage reports & disputes\n💳 Payment issues & refunds\n📦 Rental questions\n🤝 Negotiation tips\n\nWhat can I help you with today?",
@@ -81,6 +82,23 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   sendMessage: async (content) => {
+    const scan = scanChatMessage(content);
+    if (!scan.safe) {
+      const blockedMessage: ChatMessage = {
+        id: `blocked-${Date.now()}`,
+        sender: "system",
+        content:
+          scan.automatedMessage ??
+          "That message was blocked to protect your personal information.",
+        timestamp: new Date().toISOString(),
+        type: "system",
+      };
+      set((state) => ({
+        chatMessages: [...state.chatMessages, blockedMessage],
+      }));
+      return;
+    }
+
     const userMsg: ChatMessage = {
       id: `msg-${Date.now()}`,
       sender: "user",

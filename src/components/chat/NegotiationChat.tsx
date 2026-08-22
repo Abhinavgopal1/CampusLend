@@ -2,17 +2,15 @@
 
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { CHAT_PRIVACY_NOTICE, scanChatMessage } from "@/lib/chatSafety";
 import { formatPrice } from "@/lib/utils";
 import type { MockNegotiation } from "@/lib/mockData";
 import {
   Send,
   Tag,
-  CheckCircle2,
-  XCircle,
   Sparkles,
-  Shield,
-  HelpCircle,
   ArrowRight,
+  LockKeyhole,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -22,20 +20,45 @@ export function NegotiationChat({
   onAcceptOffer,
   onDeclineOffer,
   onMakeOffer,
+  listedDailyPrice,
 }: {
   negotiation: MockNegotiation;
   onAcceptOffer?: (msgId: string, amount: number) => void;
   onDeclineOffer?: (msgId: string) => void;
   onMakeOffer?: (amount: number, note: string) => void;
+  listedDailyPrice?: number;
 }) {
   const [messages, setMessages] = useState(negotiation.messages);
   const [inputText, setInputText] = useState("");
   const [customOfferAmount, setCustomOfferAmount] = useState<number | "">("");
   const [showOfferModal, setShowOfferModal] = useState(false);
+  const [safetyFeedback, setSafetyFeedback] = useState<string | null>(null);
+  const fairLow = Math.max(1, Math.round((listedDailyPrice ?? 500) * 0.85));
+  const fairHigh = Math.max(fairLow, Math.round((listedDailyPrice ?? 500) * 0.95));
 
   const handleSendText = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputText.trim()) return;
+
+    const scan = scanChatMessage(inputText);
+    if (!scan.safe) {
+      setMessages((previous) => [
+        ...previous,
+        {
+          id: `safety-${Date.now()}`,
+          sender: "ai" as const,
+          nickname: "CampusLend Safety",
+          content:
+            scan.automatedMessage ??
+            "That message was blocked to keep both students anonymous.",
+          timestamp: new Date().toISOString(),
+          type: "suggestion" as const,
+        },
+      ]);
+      setInputText("");
+      setSafetyFeedback("Personal information removed before it could be sent.");
+      return;
+    }
 
     const newMsg = {
       id: `m-${Date.now()}`,
@@ -48,6 +71,7 @@ export function NegotiationChat({
 
     setMessages((prev) => [...prev, newMsg]);
     setInputText("");
+    setSafetyFeedback("Sent anonymously as BluePanda42.");
   };
 
   const handleSendOffer = (e: React.FormEvent) => {
@@ -65,26 +89,56 @@ export function NegotiationChat({
       status: "pending" as const,
     };
 
-    setMessages((prev) => [...prev, newMsg]);
+    setMessages((prev) => [
+      ...prev,
+      newMsg,
+      {
+        id: `offer-system-${Date.now()}`,
+        sender: "ai" as const,
+        nickname: "CampusLend AI",
+        content:
+          "Offer sent without revealing either student. I will notify this room when it is accepted, declined, or countered.",
+        timestamp: new Date().toISOString(),
+        type: "suggestion" as const,
+      },
+    ]);
+    onMakeOffer?.(Number(customOfferAmount), "Anonymous price offer");
     setCustomOfferAmount("");
     setShowOfferModal(false);
   };
 
   const handleAccept = (msgId: string, amount: number) => {
-    setMessages((prev) =>
-      prev.map((m) =>
+    setMessages((prev) => [
+      ...prev.map((m) =>
         m.id === msgId ? { ...m, status: "accepted" as const } : m
-      )
-    );
+      ),
+      {
+        id: `accepted-${Date.now()}`,
+        sender: "ai" as const,
+        nickname: "CampusLend AI",
+        content:
+          "Offer accepted. Personal details stay hidden; the verified handoff card will be generated after checkout.",
+        timestamp: new Date().toISOString(),
+        type: "suggestion" as const,
+      },
+    ]);
     onAcceptOffer?.(msgId, amount);
   };
 
   const handleDecline = (msgId: string) => {
-    setMessages((prev) =>
-      prev.map((m) =>
+    setMessages((prev) => [
+      ...prev.map((m) =>
         m.id === msgId ? { ...m, status: "declined" as const } : m
-      )
-    );
+      ),
+      {
+        id: `declined-${Date.now()}`,
+        sender: "ai" as const,
+        nickname: "CampusLend AI",
+        content: "Offer declined. You can send a revised amount without sharing contact information.",
+        timestamp: new Date().toISOString(),
+        type: "suggestion" as const,
+      },
+    ]);
     onDeclineOffer?.(msgId);
   };
 
@@ -118,7 +172,9 @@ export function NegotiationChat({
       <div className="flex items-center gap-2.5 px-4 py-2.5 bg-gradient-to-r from-emerald-50/80 to-teal-50/80 dark:from-emerald-950/40 dark:to-teal-950/40 border-b border-emerald-200/60 dark:border-emerald-800/40 text-xs text-emerald-900 dark:text-emerald-200">
         <Sparkles className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
         <p className="leading-snug">
-          <span className="font-bold">CampusLend AI Price Advisor:</span> Fair market range is ₹450-₹550/day. You can negotiate up to 15% discount for rentals over 3 days.
+          <span className="font-bold">CampusLend AI Price Advisor:</span>{" "}
+          Fair range is {formatPrice(fairLow)}-{formatPrice(fairHigh)}/day.
+          Multi-day rentals can reasonably ask for up to 15% off.
         </p>
       </div>
 
@@ -186,7 +242,7 @@ export function NegotiationChat({
                     <span className="text-2xl font-black text-[var(--text-primary)]">
                       {formatPrice(msg.amount || 0)}
                     </span>
-                    <span className="text-xs text-[var(--text-muted)]"> / period</span>
+                    <span className="text-xs text-[var(--text-muted)]"> / day</span>
                   </div>
 
                   {msg.status === "pending" && !isMe && (
@@ -239,6 +295,10 @@ export function NegotiationChat({
 
       {/* Action Footer */}
       <div className="p-3 border-t border-[var(--border)] bg-[var(--surface)] space-y-2">
+        <div className="flex items-start gap-2 rounded-xl bg-emerald-50 px-3 py-2 text-[10px] font-medium leading-relaxed text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-200">
+          <LockKeyhole className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <span>{CHAT_PRIVACY_NOTICE}</span>
+        </div>
         {/* Quick Offer Drawer */}
         {showOfferModal && (
           <form
@@ -285,7 +345,11 @@ export function NegotiationChat({
             type="text"
             placeholder="Type anonymous message..."
             value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
+            onChange={(e) => {
+              setInputText(e.target.value);
+              setSafetyFeedback(null);
+            }}
+            maxLength={500}
             className="flex-1 rounded-xl border border-[var(--border)] bg-[var(--surface-hover)] px-3.5 py-2 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-blue-500 focus:bg-[var(--surface)] transition-all"
           />
 
@@ -298,6 +362,11 @@ export function NegotiationChat({
             className="rounded-xl h-9 w-9 p-0 shrink-0"
           />
         </form>
+        {safetyFeedback && (
+          <p className="px-1 text-[10px] font-semibold text-[var(--text-muted)]">
+            {safetyFeedback}
+          </p>
+        )}
       </div>
     </div>
   );

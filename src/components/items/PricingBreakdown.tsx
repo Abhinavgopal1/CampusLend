@@ -2,7 +2,7 @@
 
 import { calculateRentalCost, formatPrice } from "@/lib/utils";
 import { PLATFORM_FEE_PERCENT } from "@/lib/constants";
-import { Info, ShieldCheck, HelpCircle } from "lucide-react";
+import { Info, ShieldCheck } from "lucide-react";
 
 export function PricingBreakdown({
   dailyPrice,

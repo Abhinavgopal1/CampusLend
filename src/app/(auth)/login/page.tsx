@@ -2,15 +2,12 @@
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Badge } from "@/components/ui/Badge";
 import { useAuthStore } from "@/store/useAuthStore";
 import {
   GraduationCap,
   Mail,
   Lock,
   ArrowRight,
-  ShieldCheck,
-  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,8 +16,8 @@ import { useState } from "react";
 export default function LoginPage() {
   const router = useRouter();
   const { login, isLoading } = useAuthStore();
-  const [email, setEmail] = useState("arjun.mehta@bmu.edu.in");
-  const [password, setPassword] = useState("password123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

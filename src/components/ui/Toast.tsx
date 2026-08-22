@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { CheckCircle2, AlertTriangle, AlertCircle, Info, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 export interface ToastMessage {
   id: string;

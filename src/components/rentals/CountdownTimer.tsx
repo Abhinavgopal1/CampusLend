@@ -1,7 +1,7 @@
 "use client";
 
 import { calculateLateFee, formatPrice, getTimeRemaining } from "@/lib/utils";
-import { AlertTriangle, Clock, Flame } from "lucide-react";
+import { AlertTriangle, Clock } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export function CountdownTimer({

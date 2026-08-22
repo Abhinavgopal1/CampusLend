@@ -2,18 +2,11 @@
 
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { formatPrice } from "@/lib/utils";
 import {
   ShieldAlert,
-  Upload,
   Sparkles,
   CheckCircle2,
-  FileText,
-  AlertTriangle,
-  Send,
   Camera,
-  ArrowRight,
-  RotateCcw,
 } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
@@ -23,7 +16,7 @@ export default function DamageRecoveryPage() {
   const [damageType, setDamageType] = useState<"cosmetic" | "functional" | "missing">("cosmetic");
   const [description, setDescription] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [photos, setPhotos] = useState<string[]>([
+  const [photos] = useState<string[]>([
     "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=800",
   ]);
 

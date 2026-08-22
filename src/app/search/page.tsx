@@ -12,10 +12,11 @@ import {
   LayoutGrid,
   List,
   RotateCcw,
-  Sparkles,
-  MapPin,
   X,
   Filter,
+  Clock,
+  ShoppingBag,
+  Repeat2,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -31,6 +32,29 @@ export default function SearchPage() {
 
   const [showFilterDrawer, setShowFilterDrawer] = useState(false);
   const items = getFilteredItems();
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const query = searchParams.get("q");
+    const category = searchParams.get("category");
+    const sort = searchParams.get("sort");
+    const mode = searchParams.get("mode");
+
+    if (query) setFilter("search", query);
+    if (category) setFilter("category", category);
+    if (sort && ["newest", "price-low", "price-high", "rating"].includes(sort)) {
+      setFilter("sortBy", sort);
+    }
+    if (mode === "rent" || mode === "sale") {
+      setFilter("listingMode", mode);
+      setFilter("maxPrice", mode === "rent" ? 2000 : 50000);
+    }
+  }, [setFilter]);
+
+  const selectListingMode = (mode: "" | "rent" | "sale") => {
+    setFilter("listingMode", mode);
+    setFilter("maxPrice", mode === "rent" ? 2000 : 50000);
+  };
 
   return (
     <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -82,6 +106,52 @@ export default function SearchPage() {
             </button>
           </div>
         </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        {[
+          {
+            id: "" as const,
+            label: "Everything",
+            description: "Browse rentals and items for sale",
+            icon: Repeat2,
+          },
+          {
+            id: "rent" as const,
+            label: "Rent on campus",
+            description: "Pay by the day and return safely",
+            icon: Clock,
+          },
+          {
+            id: "sale" as const,
+            label: "Buy from students",
+            description: "Protected one-time purchases",
+            icon: ShoppingBag,
+          },
+        ].map((mode) => {
+          const Icon = mode.icon;
+          const isSelected = filters.listingMode === mode.id;
+          return (
+            <button
+              key={mode.label}
+              type="button"
+              onClick={() => selectListingMode(mode.id)}
+              className={`flex items-center gap-3 rounded-2xl border p-4 text-left transition-all ${
+                isSelected
+                  ? "border-blue-500 bg-blue-50 ring-2 ring-blue-500/15 dark:bg-blue-950/30"
+                  : "border-[var(--border)] bg-[var(--surface)] hover:border-blue-300"
+              }`}
+            >
+              <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isSelected ? "bg-blue-600 text-white" : "bg-[var(--surface-hover)] text-blue-600"}`}>
+                <Icon className="h-5 w-5" />
+              </span>
+              <span>
+                <span className="block text-sm font-black text-[var(--text-primary)]">{mode.label}</span>
+                <span className="mt-0.5 block text-[10px] text-[var(--text-muted)]">{mode.description}</span>
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Main Grid Layout */}
@@ -142,26 +212,26 @@ export default function SearchPage() {
               </select>
             </div>
 
-            {/* Max Daily Price Slider */}
+            {/* Price Slider */}
             <div className="space-y-1.5">
               <div className="flex justify-between text-xs font-bold">
                 <span className="text-[var(--text-secondary)] uppercase tracking-wider">
-                  Max Daily Price
+                  {filters.listingMode === "sale" ? "Max purchase price" : filters.listingMode === "rent" ? "Max daily price" : "Max listed price"}
                 </span>
                 <span className="text-blue-600">{formatPrice(filters.maxPrice)}</span>
               </div>
               <input
                 type="range"
                 min="0"
-                max="1000"
-                step="50"
+                max={filters.listingMode === "rent" ? 2000 : 50000}
+                step={filters.listingMode === "rent" ? 50 : 500}
                 value={filters.maxPrice}
                 onChange={(e) => setFilter("maxPrice", Number(e.target.value))}
                 className="w-full accent-blue-600 cursor-pointer"
               />
               <div className="flex justify-between text-[10px] text-[var(--text-muted)] font-mono">
                 <span>₹0</span>
-                <span>₹1,000+</span>
+                <span>{filters.listingMode === "rent" ? "₹2,000+" : "₹50,000+"}</span>
               </div>
             </div>
 
@@ -237,7 +307,7 @@ export default function SearchPage() {
         {/* Results Container */}
         <div className="flex-1 space-y-4">
           {/* Applied Filter Chips */}
-          {(filters.search || filters.category || filters.condition || filters.availability) && (
+          {(filters.search || filters.category || filters.condition || filters.availability || filters.listingMode) && (
             <div className="flex flex-wrap items-center gap-2 pb-2">
               <span className="text-xs text-[var(--text-muted)] font-medium">Applied:</span>
               {filters.search && (
@@ -264,6 +334,14 @@ export default function SearchPage() {
                   </button>
                 </Badge>
               )}
+              {filters.listingMode && (
+                <Badge variant="info" size="sm" className="gap-1">
+                  {filters.listingMode === "sale" ? "For sale" : "For rent"}
+                  <button onClick={() => selectListingMode("")}>
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
             </div>
           )}
 
@@ -277,7 +355,7 @@ export default function SearchPage() {
                 No items match your criteria
               </h3>
               <p className="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
-                Try widening your price range or clearing keyword filters to see more student rentals.
+                Try widening your price range or clearing filters to see more campus listings.
               </p>
               <Button size="sm" variant="outline" onClick={resetFilters}>
                 Clear All Filters

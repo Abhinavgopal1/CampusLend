@@ -2,7 +2,6 @@
 
 import { cn, getInitials } from "@/lib/utils";
 import { CheckCircle2 } from "lucide-react";
-import Image from "next/image";
 import { useState } from "react";
 
 export interface AvatarProps {

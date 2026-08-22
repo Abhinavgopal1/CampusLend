@@ -12,14 +12,7 @@ import {
   Sparkles,
   ShieldCheck,
   Search,
-  Zap,
   ArrowRight,
-  TrendingUp,
-  MapPin,
-  Clock,
-  Award,
-  Users,
-  Lock,
   Camera,
   CheckCircle2,
   Fingerprint,
@@ -68,11 +61,11 @@ export default function HomePage() {
 
                 <h1 className="mt-6 max-w-3xl text-4xl font-black leading-[0.98] tracking-[-0.045em] sm:text-5xl lg:text-6xl">
                   Your campus has everything you need.
-                  <span className="mt-2 block bg-gradient-to-r from-emerald-300 via-cyan-300 to-blue-400 bg-clip-text text-transparent">Borrow it, safely.</span>
+                  <span className="mt-2 block bg-gradient-to-r from-emerald-300 via-cyan-300 to-blue-400 bg-clip-text text-transparent">Borrow it or buy it, safely.</span>
                 </h1>
 
                 <p className="mt-5 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
-                  Find gear in minutes, negotiate a fair price, and exchange it through a two-party condition check that protects both students.
+                  Rent for a few days or buy it outright from another student, then exchange it through a protected public-campus handoff.
                 </p>
 
                 <form onSubmit={handleHeroSearch} className="mt-7 flex max-w-xl flex-col gap-2 rounded-3xl border border-white/10 bg-white/7 p-2 backdrop-blur sm:flex-row">
@@ -99,7 +92,7 @@ export default function HomePage() {
                     </div>
                     <Badge variant="success" size="sm">Live</Badge>
                   </div>
-                  <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=900" alt="MacBook available to rent" className="mt-4 aspect-[16/9] w-full rounded-3xl object-cover" />
+                  <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=900" alt="MacBook available through the campus marketplace" className="mt-4 aspect-[16/9] w-full rounded-3xl object-cover" />
                   <div className="mt-4 grid grid-cols-3 gap-2">
                     {[{ icon: Camera, label: "Photo proof", done: true }, { icon: Fingerprint, label: "Code match", done: true }, { icon: ScanLine, label: "Ready", done: false }].map(({ icon: Icon, label, done }) => (
                       <div key={label} className={`rounded-2xl border p-3 ${done ? "border-emerald-300/20 bg-emerald-300/10" : "border-blue-300/20 bg-blue-300/10"}`}>
@@ -154,10 +147,10 @@ export default function HomePage() {
               </div>
               <div>
                 <h3 className="text-sm font-bold text-[var(--text-primary)]">
-                  Meet CampusLend AI: Your 24/7 Rental Guardian
+                  Meet CampusLend AI: Your 24/7 Marketplace Guardian
                 </h3>
                 <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-                  Anonymous bargaining advisor, instant damage assessments, and late-fee calculations.
+                  Anonymous bargaining, personal-info blocking, protected purchases, and rental support.
                 </p>
               </div>
             </div>
@@ -187,12 +180,12 @@ export default function HomePage() {
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-xl font-black text-[var(--text-primary)]">
-                    Featured Campus Rentals
+                    Featured Campus Marketplace
                   </h2>
                   <Badge variant="warning" size="sm">Trending</Badge>
                 </div>
                 <p className="text-xs text-[var(--text-muted)]">
-                  High demand items available right now
+                  Popular rentals and student-owned items for sale
                 </p>
               </div>
               <Link href="/search?sort=rating" className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1">
@@ -218,7 +211,7 @@ export default function HomePage() {
                   <Badge variant="success" size="sm" dot>Active Now</Badge>
                 </div>
                 <p className="text-xs text-[var(--text-muted)]">
-                  Available in Hostel Blocks A, B, C & Academic Lockers
+                  Exchange safely at verified public handoff points around campus
                 </p>
               </div>
               <Link href="/search?sort=newest" className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1">
@@ -240,7 +233,7 @@ export default function HomePage() {
                 How CampusLend AI Works
               </h3>
               <p className="text-xs text-[var(--text-muted)]">
-                Simple, safe peer-to-peer micro rentals in 3 steps
+                One protected flow for rentals and student-to-student purchases
               </p>
             </div>
 
@@ -250,10 +243,10 @@ export default function HomePage() {
                   1
                 </div>
                 <h4 className="font-bold text-sm text-[var(--text-primary)]">
-                  Search or Negotiate
+                  Search, Buy or Negotiate
                 </h4>
                 <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                  Browse campus listings or make an anonymous counter-offer with AI fair price guidance.
+                  Filter by rent or sale, then make a protected purchase or an anonymous rental offer.
                 </p>
               </div>
 
@@ -262,10 +255,10 @@ export default function HomePage() {
                   2
                 </div>
                 <h4 className="font-bold text-sm text-[var(--text-primary)]">
-                  Secure Deposit Escrow
+                  Protected Checkout
                 </h4>
                 <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                  Pay the rental rate + refundable deposit. Meet at campus pickup spots like libraries or hostels.
+                  Rental deposits and purchase payments stay protected until both students verify the public handoff.
                 </p>
               </div>
 
@@ -274,10 +267,10 @@ export default function HomePage() {
                   3
                 </div>
                 <h4 className="font-bold text-sm text-[var(--text-primary)]">
-                  Return & Auto-Refund
+                  Return or Keep
                 </h4>
                 <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                  Hand back the item on time. Deposit is released automatically, and rate your peer&apos;s trust score.
+                  Return rentals for an automatic deposit release, or keep purchased items after confirming receipt.
                 </p>
               </div>
             </div>

@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/Button";
 import { StarRating } from "@/components/ui/StarRating";
 import { RATING_CATEGORIES } from "@/lib/constants";
-import { Send, Camera, CheckCircle2 } from "lucide-react";
+import { Send, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 
 export function ReviewForm({

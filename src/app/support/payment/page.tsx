@@ -5,18 +5,11 @@ import { Badge } from "@/components/ui/Badge";
 import { formatPrice } from "@/lib/utils";
 import {
   CreditCard,
-  RotateCcw,
-  Clock,
-  ShieldCheck,
   Sparkles,
   Send,
-  HelpCircle,
   Headphones,
-  CheckCircle2,
-  FileText,
 } from "lucide-react";
 import { useState } from "react";
-import Link from "next/link";
 
 export default function PaymentSupportPage() {
   const [selectedTopic, setSelectedTopic] = useState<

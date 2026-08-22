@@ -9,23 +9,13 @@ import type { MockRental } from "@/lib/mockData";
 import {
   Calendar,
   ShieldAlert,
-  RotateCcw,
-  CheckCircle2,
   AlertCircle,
   MessageCircle,
   ScanLine,
 } from "lucide-react";
 import Link from "next/link";
 
-export function RentalCard({
-  rental,
-  onReturnItem,
-  onReportIssue,
-}: {
-  rental: MockRental;
-  onReturnItem?: (id: string) => void;
-  onReportIssue?: (id: string) => void;
-}) {
+export function RentalCard({ rental }: { rental: MockRental }) {
   const statusConfig = RENTAL_STATUS_CONFIG[rental.status];
 
   return (

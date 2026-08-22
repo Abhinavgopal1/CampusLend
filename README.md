@@ -1,6 +1,6 @@
 # CampusLend
 
-CampusLend is a campus-only rental marketplace where verified students can lend and borrow everyday gear safely. It combines discovery, anonymous price negotiation, rental tracking, damage support, and a two-party handoff protocol in one responsive web app.
+CampusLend is a campus-only marketplace where verified students can buy, sell, rent, and lend everyday gear safely. It combines discovery, anonymous price negotiation, protected purchase checkout, rental tracking, damage support, and a two-party handoff protocol in one responsive web app.
 
 ## The problem
 
@@ -22,10 +22,13 @@ This creates proof for both sides before a deposit dispute happens.
 
 ## Features
 
-- Campus marketplace with search, filters, saved items, and category browsing
-- Multi-step listing creation with persistent demo data
+- Campus marketplace with separate rent and buy filters, saved items, and category browsing
+- Multi-step listing creation for rental-only, sale-only, or combined listings
+- Protected purchase checkout, reservation state, pickup code, and purchase/sale tracking
 - Booking flow with deposits, pricing breakdowns, and rental records
-- Anonymous negotiation room with fair-price guidance
+- Anonymous negotiation and transaction rooms with deterministic campus aliases
+- Automatic blocking of names, phone numbers, email addresses, social handles, links, student IDs, and private locations in chat
+- Automated safety, order, booking, offer, and handoff messages
 - CampusTrust pickup and return verification
 - Rental dashboard for active, pending, overdue, and completed rentals
 - Damage recovery and payment-support experiences
@@ -51,16 +54,16 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Demo flow
 
-1. Browse the marketplace and open an available listing.
-2. Book it using the demo payment flow.
-3. Select **Start Secure Handoff** on the confirmation screen.
-4. Upload evidence, complete the checklist, and match the displayed code.
-5. View the active rental in the dashboard.
-6. Use **Secure Return** to repeat the proof flow and complete the rental.
+1. Browse the marketplace and filter between rentals and items for sale.
+2. Rent an item with deposit escrow, or buy it through the protected demo checkout.
+3. Open the automatically created anonymous transaction chat.
+4. Use the public handoff point and one-time pickup code instead of sharing personal information.
+5. Track the rental, purchase, or sale from the marketplace dashboard.
+6. For rentals, use **Secure Return** to repeat the proof flow and release the deposit.
 
 ## Current scope
 
-This hackathon build persists listings and rentals locally in the browser. Payment, identity verification, cloud image storage, realtime chat, and AI vision analysis are represented as product-ready demo experiences and are the next integrations for a production deployment.
+This hackathon build persists listings, rentals, orders, and safe-chat history locally in the browser. Payment, identity verification, cloud image storage, realtime moderation, and AI vision analysis are represented as product-ready demo experiences and need server-side integrations for a production deployment.
 
 ## Product vision
 

@@ -3,7 +3,13 @@
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
-import { CATEGORIES, ITEM_CONDITIONS } from "@/lib/constants";
+import {
+  CATEGORIES,
+  ITEM_CONDITIONS,
+  PUBLIC_HANDOFF_SPOTS,
+} from "@/lib/constants";
+import type { ListingMode, SaleStatus } from "@/lib/mockData";
+import { containsPrivateLocation } from "@/lib/chatSafety";
 import { formatPrice } from "@/lib/utils";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useItemStore } from "@/store/useItemStore";
@@ -11,14 +17,14 @@ import {
   Upload,
   Sparkles,
   CheckCircle2,
-  Image as ImageIcon,
   ArrowRight,
   ArrowLeft,
-  DollarSign,
   MapPin,
   Clock,
   ShieldCheck,
   X,
+  ShoppingBag,
+  Repeat2,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -30,15 +36,18 @@ export default function ListItemPage() {
 
   // Form State
   const [formData, setFormData] = useState({
+    listingMode: "rent" as ListingMode,
     title: "",
     category: "electronics",
     description: "",
     condition: "good",
     dailyPrice: 150,
     weeklyPrice: 800,
+    salePrice: 3500,
+    saleStatus: "available" as SaleStatus,
     deposit: 1000,
     hourlyLateFee: 20,
-    location: "Hostel Block A, Room 210",
+    location: PUBLIC_HANDOFF_SPOTS[0] as string,
   });
 
   const [images, setImages] = useState<string[]>([
@@ -48,6 +57,7 @@ export default function ListItemPage() {
   const [isPublishing, setIsPublishing] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
   const [publishedItemId, setPublishedItemId] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const samplePhotoPresets = [
     "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800",
@@ -67,8 +77,36 @@ export default function ListItemPage() {
   };
 
   const handlePublish = async () => {
-    if (!formData.title.trim() || !formData.description.trim() || images.length === 0) {
-      setStep(formData.title.trim() && formData.description.trim() ? 1 : 2);
+    setFormError(null);
+
+    if (images.length === 0) {
+      setFormError("Add at least one clear photo before publishing.");
+      setStep(1);
+      return;
+    }
+    if (!formData.title.trim() || !formData.description.trim()) {
+      setFormError("Add a listing title and an accurate description.");
+      setStep(2);
+      return;
+    }
+    if (
+      formData.listingMode !== "sale" &&
+      (formData.dailyPrice <= 0 || formData.weeklyPrice <= 0)
+    ) {
+      setFormError("Rental rates must be greater than zero.");
+      setStep(3);
+      return;
+    }
+    if (formData.listingMode !== "rent" && formData.salePrice <= 0) {
+      setFormError("Add a valid one-time sale price.");
+      setStep(3);
+      return;
+    }
+    if (containsPrivateLocation(formData.location)) {
+      setFormError(
+        "Use a public campus handoff point, not a room number or home address."
+      );
+      setStep(4);
       return;
     }
     setIsPublishing(true);
@@ -100,7 +138,7 @@ export default function ListItemPage() {
             Your Item is Live on Campus!
           </h1>
           <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-md mx-auto">
-            Verified students at BML Munjal University can now discover and request to rent <span className="font-bold text-[var(--text-primary)]">{formData.title || "your item"}</span>.
+            Verified students can now discover and {formData.listingMode === "rent" ? "rent" : formData.listingMode === "sale" ? "buy" : "rent or buy"} <span className="font-bold text-[var(--text-primary)]">{formData.title || "your item"}</span> through a protected campus handoff.
           </p>
         </div>
 
@@ -126,13 +164,13 @@ export default function ListItemPage() {
       <div className="text-center max-w-md mx-auto space-y-1">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 text-xs font-bold mb-1">
           <Sparkles className="h-3.5 w-3.5" />
-          <span>Earn Passive Campus Income</span>
+          <span>Sell once or earn through rentals</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">
-          List an Item for Rent
+          List an Item to Sell or Rent
         </h1>
         <p className="text-xs text-[var(--text-muted)]">
-          Rent your unused electronics, gear, or books safely to campus peers
+          Choose how you want to list it, set your price, and use a verified public handoff
         </p>
       </div>
 
@@ -141,7 +179,7 @@ export default function ListItemPage() {
         {[
           { num: 1, label: "Photos & Category" },
           { num: 2, label: "Item Details" },
-          { num: 3, label: "Pricing & Deposit" },
+          { num: 3, label: "Marketplace Pricing" },
           { num: 4, label: "Location & Review" },
         ].map((s) => (
           <div key={s.num} className="flex flex-col items-center gap-1">
@@ -163,16 +201,67 @@ export default function ListItemPage() {
 
       {/* Step Forms */}
       <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 shadow-sm">
+        {formError && (
+          <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-semibold text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300">
+            {formError}
+          </div>
+        )}
         {/* Step 1: Category & Photos */}
         {step === 1 && (
           <div className="space-y-6">
             <div>
               <h3 className="text-base font-bold text-[var(--text-primary)]">
-                1. Select Category & Add Photos
+                1. Choose Listing Type, Category & Photos
               </h3>
               <p className="text-xs text-[var(--text-muted)]">
-                Choose the best category and upload clear photos of your item
+                Decide whether students can rent, buy, or choose either option
               </p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              {[
+                {
+                  id: "rent" as const,
+                  label: "Rent it",
+                  description: "Earn repeatedly and keep ownership",
+                  icon: Clock,
+                },
+                {
+                  id: "sale" as const,
+                  label: "Sell it",
+                  description: "Set one price for a permanent sale",
+                  icon: ShoppingBag,
+                },
+                {
+                  id: "both" as const,
+                  label: "Offer both",
+                  description: "Let the student rent or buy",
+                  icon: Repeat2,
+                },
+              ].map((option) => {
+                const Icon = option.icon;
+                const isSelected = formData.listingMode === option.id;
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() =>
+                      setFormData({ ...formData, listingMode: option.id })
+                    }
+                    className={`rounded-2xl border p-4 text-left transition-all ${
+                      isSelected
+                        ? "border-blue-600 bg-blue-50 text-blue-700 ring-2 ring-blue-500/20 dark:bg-blue-950/40 dark:text-blue-300"
+                        : "border-[var(--border)] hover:bg-[var(--surface-hover)]"
+                    }`}
+                  >
+                    <Icon className="h-5 w-5" />
+                    <p className="mt-3 text-sm font-black">{option.label}</p>
+                    <p className="mt-1 text-[10px] leading-relaxed text-[var(--text-muted)]">
+                      {option.description}
+                    </p>
+                  </button>
+                );
+              })}
             </div>
 
             {/* Category selection */}
@@ -354,10 +443,10 @@ export default function ListItemPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base font-bold text-[var(--text-primary)]">
-                  3. Rental Rates & Security Deposit
+                  3. Set Marketplace Pricing
                 </h3>
                 <p className="text-xs text-[var(--text-muted)]">
-                  Set fair rates and refundable security deposit
+                  Add only the prices that match your listing type
                 </p>
               </div>
               <button
@@ -368,47 +457,77 @@ export default function ListItemPage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
-                label="Daily Rental Rate (₹)"
-                type="number"
-                value={formData.dailyPrice}
-                onChange={(e) => setFormData({ ...formData, dailyPrice: Number(e.target.value) })}
-                required
-              />
-              <Input
-                label="Weekly Rental Rate (₹)"
-                type="number"
-                value={formData.weeklyPrice}
-                onChange={(e) => setFormData({ ...formData, weeklyPrice: Number(e.target.value) })}
-                required
-              />
-            </div>
+            {formData.listingMode !== "sale" && (
+              <div className="space-y-4 rounded-2xl border border-blue-200 bg-blue-50/50 p-4 dark:border-blue-900 dark:bg-blue-950/20">
+                <div className="flex items-center gap-2 text-xs font-black text-blue-700 dark:text-blue-300">
+                  <Clock className="h-4 w-4" /> Rental pricing
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Input
+                    label="Daily Rental Rate (₹)"
+                    type="number"
+                    min={1}
+                    value={formData.dailyPrice}
+                    onChange={(e) => setFormData({ ...formData, dailyPrice: Number(e.target.value) })}
+                    required
+                  />
+                  <Input
+                    label="Weekly Rental Rate (₹)"
+                    type="number"
+                    min={1}
+                    value={formData.weeklyPrice}
+                    onChange={(e) => setFormData({ ...formData, weeklyPrice: Number(e.target.value) })}
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Input
+                    label="Security Deposit (₹ Refundable)"
+                    type="number"
+                    min={0}
+                    value={formData.deposit}
+                    onChange={(e) => setFormData({ ...formData, deposit: Number(e.target.value) })}
+                    hint="Held in escrow to protect against damage or loss"
+                    required
+                  />
+                  <Input
+                    label="Hourly Overdue Late Fee (₹/hr)"
+                    type="number"
+                    min={0}
+                    value={formData.hourlyLateFee}
+                    onChange={(e) => setFormData({ ...formData, hourlyLateFee: Number(e.target.value) })}
+                    hint="Charged only after the verified return deadline"
+                    required
+                  />
+                </div>
+              </div>
+            )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
-                label="Security Deposit (₹ Refundable)"
-                type="number"
-                value={formData.deposit}
-                onChange={(e) => setFormData({ ...formData, deposit: Number(e.target.value) })}
-                hint="Held in escrow to protect against damage or loss"
-                required
-              />
-              <Input
-                label="Hourly Overdue Late Fee (₹/hr)"
-                type="number"
-                value={formData.hourlyLateFee}
-                onChange={(e) => setFormData({ ...formData, hourlyLateFee: Number(e.target.value) })}
-                hint="Charged per hour if not returned before deadline"
-                required
-              />
-            </div>
+            {formData.listingMode !== "rent" && (
+              <div className="space-y-4 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 dark:border-emerald-900 dark:bg-emerald-950/20">
+                <div className="flex items-center gap-2 text-xs font-black text-emerald-700 dark:text-emerald-300">
+                  <ShoppingBag className="h-4 w-4" /> One-time sale pricing
+                </div>
+                <Input
+                  label="Sale Price (₹)"
+                  type="number"
+                  min={1}
+                  value={formData.salePrice}
+                  onChange={(e) => setFormData({ ...formData, salePrice: Number(e.target.value) })}
+                  hint="Buyers see a separate 2% protection fee at checkout"
+                  required
+                />
+              </div>
+            )}
 
             {/* AI Fair Price Tip */}
             <div className="rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 p-3.5 flex items-start gap-2.5 text-xs text-emerald-900 dark:text-emerald-200">
               <Sparkles className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
               <p className="leading-relaxed">
-                <span className="font-bold">AI Pricing Suggestion:</span> Listings with ₹100-300 daily rate and ₹1,000 deposit rent 3.4x faster on BMU campus.
+                <span className="font-bold">Smart pricing tip:</span>{" "}
+                {formData.listingMode === "sale"
+                  ? "Check the current used-market value and price slightly below it for a faster campus sale."
+                  : "Rental listings with a weekly discount and a reasonable deposit receive more verified requests."}
               </p>
             </div>
 
@@ -446,14 +565,28 @@ export default function ListItemPage() {
               </button>
             </div>
 
-            <Input
-              label="Campus Pickup Location"
-              placeholder="e.g. Hostel Block A, Central Library, or SAC Gate"
-              value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              icon={MapPin}
-              required
-            />
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">
+                Public campus handoff point
+              </label>
+              <div className="relative">
+                <MapPin className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-600" />
+                <select
+                  value={formData.location}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] py-2.5 pl-10 pr-4 text-sm text-[var(--text-primary)] focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                >
+                  {PUBLIC_HANDOFF_SPOTS.map((spot) => (
+                    <option key={spot} value={spot}>{spot}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-start gap-2 rounded-xl bg-blue-50 px-3 py-2 text-[10px] leading-relaxed text-blue-800 dark:bg-blue-950/30 dark:text-blue-200">
+                <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                Room numbers and home addresses are never used. Exact coordination
+                happens through the protected handoff card.
+              </div>
+            </div>
 
             {/* Review Summary Card */}
             <div className="rounded-2xl bg-[var(--surface-hover)] p-4 border border-[var(--border)] space-y-3 text-xs">
@@ -465,16 +598,34 @@ export default function ListItemPage() {
                 <span className="font-bold text-[var(--text-primary)]">{formData.title || "MacBook Pro 14"}</span>
               </div>
               <div className="flex justify-between">
+                <span className="text-[var(--text-muted)]">Listing type:</span>
+                <span className="capitalize font-bold text-[var(--text-primary)]">{formData.listingMode === "both" ? "Rent or buy" : formData.listingMode}</span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-[var(--text-muted)]">Category:</span>
                 <span className="capitalize font-semibold text-[var(--text-primary)]">{formData.category}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-[var(--text-muted)]">Daily / Weekly Rate:</span>
-                <span className="font-bold text-blue-600">{formatPrice(formData.dailyPrice)}/day • {formatPrice(formData.weeklyPrice)}/wk</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[var(--text-muted)]">Refundable Deposit:</span>
-                <span className="font-bold text-emerald-600">{formatPrice(formData.deposit)}</span>
+              {formData.listingMode !== "sale" && (
+                <>
+                  <div className="flex justify-between gap-3">
+                    <span className="text-[var(--text-muted)]">Rental pricing:</span>
+                    <span className="text-right font-bold text-blue-600">{formatPrice(formData.dailyPrice)}/day • {formatPrice(formData.weeklyPrice)}/wk</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[var(--text-muted)]">Refundable deposit:</span>
+                    <span className="font-bold text-blue-600">{formatPrice(formData.deposit)}</span>
+                  </div>
+                </>
+              )}
+              {formData.listingMode !== "rent" && (
+                <div className="flex justify-between">
+                  <span className="text-[var(--text-muted)]">Sale price:</span>
+                  <span className="font-bold text-emerald-600">{formatPrice(formData.salePrice)}</span>
+                </div>
+              )}
+              <div className="flex justify-between gap-3">
+                <span className="text-[var(--text-muted)]">Handoff:</span>
+                <span className="text-right font-semibold text-[var(--text-primary)]">{formData.location}</span>
               </div>
             </div>
 
@@ -487,7 +638,7 @@ export default function ListItemPage() {
               icon={CheckCircle2}
               className="w-full text-base font-bold shadow-lg shadow-emerald-500/20"
             >
-              Publish Listing on Campus
+              Publish Sell / Rent Listing
             </Button>
           </div>
         )}

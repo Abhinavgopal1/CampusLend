@@ -1,36 +1,39 @@
 "use client";
 
-import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { PricingBreakdown } from "@/components/items/PricingBreakdown";
-import { calculateRentalCost, formatDate, formatPrice } from "@/lib/utils";
+import {
+  calculateRentalCost,
+  formatDate,
+  formatPrice,
+  getPublicHandoffSpot,
+} from "@/lib/utils";
 import { useItemStore } from "@/store/useItemStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRentalStore } from "@/store/useRentalStore";
+import { useMessageStore } from "@/store/useMessageStore";
 import {
-  Calendar,
   CheckCircle2,
   ShieldCheck,
   CreditCard,
-  Building,
   ArrowRight,
   ArrowLeft,
   Lock,
-  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export default function BookingPage() {
-  const params = useParams();
+  const params = useParams<{ id: string }>();
   const searchParams = useSearchParams();
-  const id = params?.id as string;
+  const id = params.id;
 
   const { getItemById, setItemAvailability } = useItemStore();
   const { user } = useAuthStore();
   const { confirmBooking } = useRentalStore();
+  const { ensureTransactionConversation } = useMessageStore();
   const item = getItemById(id);
 
   const initialDays = Number(searchParams.get("days")) || 3;
@@ -41,6 +44,7 @@ export default function BookingPage() {
   const [paymentMethod, setPaymentMethod] = useState<"upi" | "card" | "netbanking">("upi");
   const [isProcessing, setIsProcessing] = useState(false);
   const [rentalId, setRentalId] = useState<string | null>(null);
+  const [conversationId, setConversationId] = useState<string | null>(null);
 
   if (!item) {
     return (
@@ -64,6 +68,7 @@ export default function BookingPage() {
 
   const startDate = new Date();
   const endDate = new Date(startDate.getTime() + days * 24 * 60 * 60 * 1000);
+  const handoffSpot = getPublicHandoffSpot(item.location);
 
   const handlePayAndConfirm = async () => {
     setIsProcessing(true);
@@ -81,7 +86,16 @@ export default function BookingPage() {
       hourlyLateFee: item.hourlyLateFee,
     });
     setItemAvailability(item.id, "rented");
+    const safeConversationId = ensureTransactionConversation({
+      id: `rental-${rental.id}`,
+      peerId: item.ownerId,
+      itemId: item.id,
+      itemTitle: item.title,
+      type: "rental",
+      automatedText: `Rental ${rental.id} is confirmed. Coordinate only through this anonymous room. Meet at ${handoffSpot}; the CampusTrust handoff code will verify both students without sharing contact details.`,
+    });
     setRentalId(rental.id);
+    setConversationId(safeConversationId);
     setIsProcessing(false);
     setStep(3);
   };
@@ -194,7 +208,7 @@ export default function BookingPage() {
                   <div className="flex justify-between pt-1 border-t border-[var(--border)]">
                     <span className="text-[var(--text-muted)]">Pickup Location:</span>
                     <span className="font-semibold text-[var(--text-primary)]">
-                      {item.location}
+                      {handoffSpot}
                     </span>
                   </div>
                 </div>
@@ -321,7 +335,7 @@ export default function BookingPage() {
                     {item.title}
                   </h4>
                   <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                    {item.location}
+                    {handoffSpot}
                   </p>
                   <p className="text-xs font-bold text-blue-600 mt-1">
                     {formatPrice(dailyPrice)}/day
@@ -367,7 +381,7 @@ export default function BookingPage() {
             </div>
             <div className="flex justify-between">
               <span className="text-[var(--text-muted)]">Pickup Handoff:</span>
-              <span className="font-bold text-[var(--text-primary)]">{item.location}</span>
+              <span className="font-bold text-[var(--text-primary)]">{handoffSpot}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-[var(--text-muted)]">Return Deadline:</span>
@@ -385,9 +399,9 @@ export default function BookingPage() {
                 Start Secure Handoff
               </Button>
             </Link>
-            <Link href="/" className="flex-1">
+            <Link href={conversationId ? `/messages?conversation=${conversationId}` : "/messages"} className="flex-1">
               <Button size="md" variant="outline" className="w-full text-xs font-bold">
-                Back to Home
+                Open Safe Chat
               </Button>
             </Link>
           </div>

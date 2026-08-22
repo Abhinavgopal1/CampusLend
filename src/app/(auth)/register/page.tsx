@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Badge } from "@/components/ui/Badge";
 import { useAuthStore } from "@/store/useAuthStore";
 import {
   GraduationCap,
@@ -60,7 +59,7 @@ export default function RegisterPage() {
             <div className="space-y-4">
               <Input
                 label="Full Name"
-                placeholder="e.g. Arjun Mehta"
+                placeholder="e.g. BluePanda42"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 icon={User}

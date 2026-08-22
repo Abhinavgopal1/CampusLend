@@ -4,27 +4,26 @@ import { CATEGORIES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { useItemStore } from "@/store/useItemStore";
 import {
-  Sparkles,
-  TrendingUp,
   Clock,
   ShieldCheck,
   Award,
-  HelpCircle,
-  Settings,
   Flame,
   MessageSquare,
   FileCheck2,
+  ShoppingBag,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { filters, setFilter } = useItemStore();
 
   const mainLinks = [
-    { label: "Trending on Campus", href: "/search?sort=popular", icon: Flame, badge: "Hot" },
-    { label: "Active Rentals", href: "/dashboard", icon: Clock },
+    { label: "Trending on Campus", href: "/search?sort=rating", icon: Flame, badge: "Hot" },
+    { label: "Buy from Students", href: "/search?mode=sale", icon: ShoppingBag, badge: "New" },
+    { label: "Orders & Rentals", href: "/dashboard", icon: Clock },
     { label: "Price Negotiations", href: "/messages", icon: MessageSquare, badge: "Live" },
     { label: "Damage Recovery AI", href: "/support/damage", icon: ShieldCheck },
     { label: "Payment Assistant", href: "/support/payment", icon: FileCheck2 },
@@ -89,7 +88,15 @@ export function Sidebar() {
             return (
               <button
                 key={cat.id}
-                onClick={() => setFilter("category", isSelected ? "" : cat.id)}
+                onClick={() => {
+                  const nextCategory = isSelected ? "" : cat.id;
+                  setFilter("category", nextCategory);
+                  router.push(
+                    nextCategory
+                      ? `/search?category=${encodeURIComponent(nextCategory)}`
+                      : "/search"
+                  );
+                }}
                 className={cn(
                   "flex w-full items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all text-left",
                   isSelected

@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { formatPrice } from "@/lib/utils";
 import { MOCK_ITEMS } from "@/lib/mockData";
-import { ArrowLeft, Ban, Eye, Flame, Trash2 } from "lucide-react";
+import { ArrowLeft, Eye, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 

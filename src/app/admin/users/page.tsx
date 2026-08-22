@@ -3,9 +3,8 @@
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { formatPrice } from "@/lib/utils";
 import { MOCK_USERS } from "@/lib/mockData";
-import { ArrowLeft, CheckCircle2, ShieldCheck, UserX, Search } from "lucide-react";
+import { ArrowLeft, UserX, Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 

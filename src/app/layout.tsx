@@ -1,29 +1,18 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { TopNav } from "@/components/layout/TopNav";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { AIChatbot } from "@/components/chat/AIChatbot";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
-const outfit = Outfit({
-  subsets: ["latin"],
-  variable: "--font-outfit",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
-  title: "CampusLend AI — Peer-to-Peer Micro-Lending for Students",
+  title: "CampusLend AI — Buy, Sell & Rent on Campus",
   description:
-    "The hyperlocal, AI-powered campus marketplace for college students. Rent laptops, books, sports gear, cameras, and hostel essentials with verified safety.",
+    "A verified student marketplace to buy, sell, and rent campus essentials with anonymous chats and protected public handoffs.",
   keywords: [
     "campus rental",
     "student lending",
+    "student marketplace",
+    "campus buy and sell",
     "peer to peer rental",
     "college marketplace",
     "AI damage assessment",
@@ -38,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${outfit.variable} scroll-smooth`}>
+    <html lang="en" suppressHydrationWarning className="scroll-smooth">
       <head>
         <script
           dangerouslySetInnerHTML={{

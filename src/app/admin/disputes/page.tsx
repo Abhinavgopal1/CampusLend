@@ -3,7 +3,7 @@
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { formatPrice } from "@/lib/utils";
-import { ArrowLeft, CheckCircle2, ShieldAlert, Sparkles, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -12,8 +12,8 @@ export default function AdminDisputesPage() {
     {
       id: "DR-2026-0819",
       item: "Canon EOS R50 Camera Kit",
-      lender: "Arjun Mehta",
-      borrower: "Rahul Gupta",
+      lender: "BluePanda42",
+      borrower: "AmberFox63",
       deposit: 8000,
       damage: "Minor Lens Bevel Scuff",
       aiRecommendation: "Deduct ₹500 from deposit, release ₹7,500 to borrower",
@@ -22,8 +22,8 @@ export default function AdminDisputesPage() {
     {
       id: "DR-2026-0818",
       item: "Honda Activa 6G Scooter",
-      lender: "Karan Chopra",
-      borrower: "Vikram Singh",
+      lender: "TealFalcon18",
+      borrower: "CoralLynx34",
       deposit: 3000,
       damage: "Helmet strap clip missing",
       aiRecommendation: "Deduct ₹150 for replacement clip",

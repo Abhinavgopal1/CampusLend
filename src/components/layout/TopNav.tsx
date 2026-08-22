@@ -20,6 +20,7 @@ import {
   ShieldAlert,
   Compass,
   LayoutDashboard,
+  ShoppingBag,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -68,6 +69,9 @@ export function TopNav() {
             <Link href="/search" className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-bold text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-blue-600 transition-colors">
               <Compass className="h-3.5 w-3.5" /> Explore
             </Link>
+            <Link href="/search?mode=sale" className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-bold text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-emerald-600 transition-colors">
+              <ShoppingBag className="h-3.5 w-3.5" /> Buy
+            </Link>
             <Link href="/dashboard" className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-bold text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-blue-600 transition-colors">
               <LayoutDashboard className="h-3.5 w-3.5" /> Dashboard
             </Link>
@@ -114,7 +118,7 @@ export function TopNav() {
           {/* List Item CTA button */}
           <Link href="/list-item" className="hidden sm:inline-block">
             <Button size="sm" variant="accent" icon={Plus}>
-              List Item
+              Sell / Rent
             </Button>
           </Link>
 
@@ -235,7 +239,7 @@ export function TopNav() {
                       className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[var(--text-primary)] hover:bg-[var(--surface-hover)] font-medium"
                     >
                       <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                      Rentals & Time Tracker
+                      Orders, Rentals & Sales
                     </Link>
                     <Link
                       href="/messages"

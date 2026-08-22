@@ -4,19 +4,13 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { formatPrice } from "@/lib/utils";
-import { MOCK_USERS, MOCK_ITEMS, MOCK_RENTALS } from "@/lib/mockData";
+import { MOCK_USERS, MOCK_ITEMS } from "@/lib/mockData";
 import {
   ShieldAlert,
   Users,
   Package,
   DollarSign,
-  TrendingUp,
-  AlertTriangle,
   Sparkles,
-  CheckCircle2,
-  XCircle,
-  Eye,
-  SlidersHorizontal,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -165,7 +159,7 @@ export default function AdminOverviewPage() {
 
             <div className="rounded-2xl bg-[var(--surface-hover)] p-4 border border-[var(--border)] space-y-2 text-xs text-[var(--text-secondary)]">
               <p>
-                <span className="font-bold text-[var(--text-primary)]">Lender:</span> Arjun Mehta • <span className="font-bold text-[var(--text-primary)]">Borrower:</span> Rahul Gupta
+                <span className="font-bold text-[var(--text-primary)]">Lender:</span> BluePanda42 • <span className="font-bold text-[var(--text-primary)]">Borrower:</span> AmberFox63
               </p>
               <p>
                 <span className="font-bold text-[var(--text-primary)]">AI Recommendation:</span> Deduct ₹500 from ₹8,000 security deposit for lens cap replacement. Release balance ₹7,500 to borrower.

@@ -3,7 +3,8 @@
 // ============================================================
 
 import { clsx, type ClassValue } from "clsx";
-import { PLATFORM_FEE_PERCENT } from "./constants";
+import { BUYER_PROTECTION_FEE_PERCENT, PLATFORM_FEE_PERCENT } from "./constants";
+import type { ListingMode, MockItem } from "./mockData";
 
 /**
  * Merge class names with clsx (Tailwind-friendly)
@@ -45,6 +46,68 @@ export function calculateRentalCost(
     deposit,
     total: subtotal + platformFee + deposit,
   };
+}
+
+export function calculatePurchaseCost(itemPrice: number): {
+  itemPrice: number;
+  protectionFee: number;
+  total: number;
+} {
+  const protectionFee = Math.round(
+    itemPrice * (BUYER_PROTECTION_FEE_PERCENT / 100)
+  );
+
+  return {
+    itemPrice,
+    protectionFee,
+    total: itemPrice + protectionFee,
+  };
+}
+
+export function getListingMode(item: MockItem): ListingMode {
+  return item.listingMode ?? "rent";
+}
+
+export function isForRent(item: MockItem): boolean {
+  const mode = getListingMode(item);
+  return mode === "rent" || mode === "both";
+}
+
+export function isForSale(item: MockItem): boolean {
+  const mode = getListingMode(item);
+  return mode === "sale" || mode === "both";
+}
+
+export function isRentableNow(item: MockItem): boolean {
+  return isForRent(item) && item.availability === "available";
+}
+
+export function isPurchasableNow(item: MockItem): boolean {
+  return (
+    isForSale(item) &&
+    item.availability === "available" &&
+    (item.saleStatus ?? "available") === "available" &&
+    typeof item.salePrice === "number"
+  );
+}
+
+export function getPublicHandoffSpot(location: string): string {
+  const normalized = location.toLowerCase();
+
+  if (normalized.includes("library")) return "Central Library entrance";
+  if (normalized.includes("sports")) return "Sports Complex reception";
+  if (normalized.includes("academic") || normalized.includes("lab")) {
+    return "Academic Block security desk";
+  }
+  if (normalized.includes("student") || normalized.includes("music")) {
+    return "Student Activity Centre help desk";
+  }
+  if (normalized.includes("hostel")) return "Nearest hostel reception";
+  if (normalized.includes("parking") || normalized.includes("gate")) {
+    return "Main Gate security kiosk";
+  }
+
+  return "Verified campus handoff point";
 }
 
 /**

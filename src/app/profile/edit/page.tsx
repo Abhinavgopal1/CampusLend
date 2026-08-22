@@ -3,9 +3,8 @@
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
 import { useAuthStore } from "@/store/useAuthStore";
-import { ArrowLeft, CheckCircle2, Save, Upload, ShieldCheck } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Save, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -14,7 +13,7 @@ export default function EditProfilePage() {
   const router = useRouter();
   const { user, updateProfile } = useAuthStore();
 
-  const [name, setName] = useState(user?.name || "Arjun Mehta");
+  const [name, setName] = useState(user?.name || "BluePanda42");
   const [college, setCollege] = useState(user?.college || "BML Munjal University");
   const [department, setDepartment] = useState(user?.department || "Computer Science");
   const [isSaved, setIsSaved] = useState(false);

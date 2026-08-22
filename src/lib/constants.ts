@@ -94,7 +94,7 @@ export interface NavItem {
 export const BOTTOM_NAV_ITEMS: NavItem[] = [
   { id: "home", label: "Home", href: "/", icon: Home },
   { id: "search", label: "Search", href: "/search", icon: Search },
-  { id: "list", label: "List Item", href: "/list-item", icon: PlusCircle },
+  { id: "list", label: "Sell / Rent", href: "/list-item", icon: PlusCircle },
   { id: "messages", label: "Messages", href: "/messages", icon: MessageCircle },
   { id: "profile", label: "Profile", href: "/profile", icon: User },
 ];
@@ -161,10 +161,19 @@ export const ITEM_CONDITIONS = [
 // Platform Config
 // ----------------------------------------------------------
 export const PLATFORM_FEE_PERCENT = 5;
+export const BUYER_PROTECTION_FEE_PERCENT = 2;
 export const MAX_IMAGES_PER_LISTING = 8;
 export const MAX_REVIEW_LENGTH = 500;
 export const MIN_RENTAL_DAYS = 1;
 export const MAX_RENTAL_DAYS = 30;
+
+export const PUBLIC_HANDOFF_SPOTS = [
+  "Central Library entrance",
+  "Student Activity Centre help desk",
+  "Academic Block 1 security desk",
+  "Sports Complex reception",
+  "Main Gate security kiosk",
+] as const;
 
 // ----------------------------------------------------------
 // Rating Labels

@@ -1,18 +1,22 @@
 "use client";
 
 import { RentalCard } from "@/components/rentals/RentalCard";
+import { PurchaseOrderCard } from "@/components/purchases/PurchaseOrderCard";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, getListingMode, isForSale } from "@/lib/utils";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useChatStore } from "@/store/useChatStore";
 import { useItemStore } from "@/store/useItemStore";
 import { useRentalStore } from "@/store/useRentalStore";
 import {
+  usePurchaseStore,
+  type PurchaseStatus,
+} from "@/store/usePurchaseStore";
+import { useMessageStore } from "@/store/useMessageStore";
+import {
   Clock,
   CheckCircle2,
-  AlertTriangle,
-  RotateCcw,
   DollarSign,
   TrendingUp,
   Package,
@@ -20,21 +24,22 @@ import {
   Plus,
   Edit,
   Pause,
-  Trash2,
-  SlidersHorizontal,
   ShieldCheck,
+  ShoppingBag,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
   const { openChat } = useChatStore();
-  const { items, setItemAvailability } = useItemStore();
-  const { rentals, updateRentalStatus } = useRentalStore();
+  const { items, setItemAvailability, setSaleStatus } = useItemStore();
+  const { rentals } = useRentalStore();
+  const { orders, updateOrderStatus } = usePurchaseStore();
+  const { addAutomatedMessage } = useMessageStore();
 
   const [activeTab, setActiveTab] = useState<
-    "active" | "overdue" | "upcoming" | "completed" | "my-listings"
+    "active" | "overdue" | "upcoming" | "completed" | "orders" | "my-listings"
   >("active");
 
   const myListings = items.filter((item) => item.ownerId === user?.id);
@@ -43,16 +48,37 @@ export default function DashboardPage() {
   const pendingRentals = rentals.filter((r) => r.status === "pending");
   const overdueRentals = rentals.filter((r) => r.status === "overdue");
   const completedRentals = rentals.filter((r) => r.status === "completed");
+  const purchaseOrders = orders.filter((order) => order.buyerId === user?.id);
+  const saleOrders = orders.filter((order) => order.sellerId === user?.id);
+  const purchaseTotal = purchaseOrders.reduce((total, order) => total + order.total, 0);
 
-  const handleReturnItem = (id: string) => {
-    updateRentalStatus(id, "completed");
-  };
+  useEffect(() => {
+    const requestedTab = new URLSearchParams(window.location.search).get("tab");
+    if (requestedTab !== "orders") return;
+    const timeoutId = window.setTimeout(() => setActiveTab("orders"), 0);
+    return () => window.clearTimeout(timeoutId);
+  }, []);
 
   const handleTogglePause = (id: string) => {
     const item = items.find((listing) => listing.id === id);
     if (item) {
       setItemAvailability(id, item.availability === "available" ? "paused" : "available");
     }
+  };
+
+  const handleOrderUpdate = (id: string, status: PurchaseStatus) => {
+    const order = orders.find((candidate) => candidate.id === id);
+    if (!order) return;
+
+    updateOrderStatus(id, status);
+    if (status === "completed") setSaleStatus(order.itemId, "sold");
+
+    addAutomatedMessage(
+      `purchase-${id}`,
+      status === "ready-for-handoff"
+        ? "Seller marked the item ready. Meet only at the verified public handoff point and match the in-app pickup code."
+        : "Buyer confirmed receipt. The protected payment has been released and this sale is complete."
+    );
   };
 
   return (
@@ -62,12 +88,12 @@ export default function DashboardPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">
-              Rental Dashboard & Time Tracker
+              Marketplace Dashboard
             </h1>
             <Badge variant="success" size="sm" pulse>Live Sync</Badge>
           </div>
           <p className="text-xs text-[var(--text-muted)]">
-            Manage your active borrowings, returns, security deposits, and lending earnings
+            Track rentals, purchases, sales, handoffs, and protected payments in one place
           </p>
         </div>
 
@@ -83,7 +109,7 @@ export default function DashboardPage() {
           </Button>
           <Link href="/list-item">
             <Button size="sm" variant="primary" icon={Plus} className="text-xs">
-              List New Item
+              Sell or Rent Item
             </Button>
           </Link>
         </div>
@@ -108,14 +134,14 @@ export default function DashboardPage() {
         {/* Spent Card */}
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5 space-y-2 shadow-sm">
           <div className="flex items-center justify-between text-[var(--text-muted)] text-xs">
-            <span className="font-semibold">Rental Spending</span>
+            <span className="font-semibold">Marketplace Spending</span>
             <TrendingUp className="h-4 w-4 text-blue-500" />
           </div>
           <p className="text-2xl font-black text-[var(--text-primary)]">
-            {formatPrice(user?.totalSpent || 8200)}
+            {formatPrice((user?.totalSpent || 8200) + purchaseTotal)}
           </p>
           <span className="text-[10px] text-[var(--text-muted)] font-medium">
-            5 items rented
+            {purchaseOrders.length} purchases • 5 rentals
           </span>
         </div>
 
@@ -143,7 +169,7 @@ export default function DashboardPage() {
             {myListings.length}
           </p>
           <span className="text-[10px] text-purple-600 font-bold">
-            {myListings.filter((i) => i.availability === "available").length} Available
+            {myListings.filter((item) => item.availability === "available").length} Active
           </span>
         </div>
       </div>
@@ -154,6 +180,7 @@ export default function DashboardPage() {
           { id: "active", label: "Active Rentals", count: activeRentals.length },
           { id: "upcoming", label: "Awaiting Handoff", count: pendingRentals.length },
           { id: "overdue", label: "Overdue Items", count: overdueRentals.length, alert: overdueRentals.length > 0 },
+          { id: "orders", label: "Purchases & Sales", count: purchaseOrders.length + saleOrders.length },
           { id: "completed", label: "History & Completed", count: completedRentals.length },
           { id: "my-listings", label: "My Listings Management", count: myListings.length },
         ].map((tab) => (
@@ -196,7 +223,7 @@ export default function DashboardPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {activeRentals.map((r) => (
-                <RentalCard key={r.id} rental={r} onReturnItem={handleReturnItem} />
+                <RentalCard key={r.id} rental={r} />
               ))}
             </div>
           )}
@@ -214,7 +241,7 @@ export default function DashboardPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {overdueRentals.map((r) => (
-                <RentalCard key={r.id} rental={r} onReturnItem={handleReturnItem} />
+                <RentalCard key={r.id} rental={r} />
               ))}
             </div>
           )}
@@ -233,6 +260,75 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {pendingRentals.map((r) => <RentalCard key={r.id} rental={r} />)}
             </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === "orders" && (
+        <div className="space-y-8">
+          {purchaseOrders.length === 0 && saleOrders.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-[var(--border)] p-10 text-center">
+              <ShoppingBag className="mx-auto h-9 w-9 text-[var(--text-muted)]" />
+              <h3 className="mt-3 text-sm font-bold text-[var(--text-primary)]">
+                No purchases or sales yet
+              </h3>
+              <p className="mt-1 text-xs text-[var(--text-muted)]">
+                Buy from a verified student or list something for sale to start.
+              </p>
+              <Link href="/search?mode=sale">
+                <Button size="sm" variant="accent" className="mt-4">
+                  Browse items for sale
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <>
+              {purchaseOrders.length > 0 && (
+                <section className="space-y-3">
+                  <div>
+                    <h2 className="text-base font-black text-[var(--text-primary)]">
+                      My purchases
+                    </h2>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      Protected payments stay on hold until pickup is confirmed.
+                    </p>
+                  </div>
+                  <div className="grid gap-5 md:grid-cols-2">
+                    {purchaseOrders.map((order) => (
+                      <PurchaseOrderCard
+                        key={order.id}
+                        order={order}
+                        role="buyer"
+                        onUpdateStatus={handleOrderUpdate}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {saleOrders.length > 0 && (
+                <section className="space-y-3">
+                  <div>
+                    <h2 className="text-base font-black text-[var(--text-primary)]">
+                      My sales
+                    </h2>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      Mark an item ready only when you can complete the public handoff.
+                    </p>
+                  </div>
+                  <div className="grid gap-5 md:grid-cols-2">
+                    {saleOrders.map((order) => (
+                      <PurchaseOrderCard
+                        key={order.id}
+                        order={order}
+                        role="seller"
+                        onUpdateStatus={handleOrderUpdate}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+            </>
           )}
         </div>
       )}
@@ -257,18 +353,45 @@ export default function DashboardPage() {
               >
                 <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-100">
                   <img src={item.images[0]} alt={item.title} className="h-full w-full object-cover" />
-                  <div className="absolute top-2 right-2">
-                    <Badge variant={item.availability === "available" ? "success" : "warning"} size="sm">
-                      {item.availability.toUpperCase()}
+                  <div className="absolute inset-x-2 top-2 flex items-center justify-between">
+                    <Badge variant="info" size="sm">
+                      {getListingMode(item) === "both" ? "RENT + SALE" : getListingMode(item).toUpperCase()}
+                    </Badge>
+                    <Badge
+                      variant={
+                        item.availability === "paused" || item.saleStatus === "sold"
+                          ? "secondary"
+                          : item.saleStatus === "reserved" || item.availability === "rented"
+                            ? "warning"
+                            : "success"
+                      }
+                      size="sm"
+                    >
+                      {item.availability === "paused"
+                        ? "PAUSED"
+                        : item.saleStatus === "sold"
+                          ? "SOLD"
+                          : item.saleStatus === "reserved"
+                            ? "RESERVED"
+                            : item.availability.toUpperCase()}
                     </Badge>
                   </div>
                 </div>
 
                 <div>
                   <h4 className="font-bold text-sm text-[var(--text-primary)] line-clamp-1">{item.title}</h4>
-                  <p className="text-xs font-bold text-blue-600 mt-1">
-                    {formatPrice(item.dailyPrice)}/day • Deposit: {formatPrice(item.deposit)}
-                  </p>
+                  <div className="mt-1 space-y-0.5 text-xs font-bold">
+                    {getListingMode(item) !== "sale" && (
+                      <p className="text-blue-600">
+                        {formatPrice(item.dailyPrice)}/day • {formatPrice(item.deposit)} deposit
+                      </p>
+                    )}
+                    {isForSale(item) && item.salePrice && (
+                      <p className="text-emerald-600">
+                        {formatPrice(item.salePrice)} sale price
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Owner controls */}
@@ -278,6 +401,7 @@ export default function DashboardPage() {
                     variant="outline"
                     icon={Pause}
                     onClick={() => handleTogglePause(item.id)}
+                    disabled={item.saleStatus === "sold" || item.availability === "rented"}
                     className="text-xs h-8"
                   >
                     {item.availability === "available" ? "Pause" : "Resume"}

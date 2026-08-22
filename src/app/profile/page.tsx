@@ -8,20 +8,12 @@ import { StarRating } from "@/components/ui/StarRating";
 import { ItemCard } from "@/components/items/ItemCard";
 import { ReviewCard } from "@/components/reviews/ReviewCard";
 import { formatPrice } from "@/lib/utils";
-import { MOCK_ITEMS, MOCK_REVIEWS, MOCK_RENTALS } from "@/lib/mockData";
+import { MOCK_ITEMS, MOCK_REVIEWS } from "@/lib/mockData";
 import { useAuthStore } from "@/store/useAuthStore";
 import {
   GraduationCap,
-  ShieldCheck,
-  Award,
-  Clock,
-  DollarSign,
-  TrendingUp,
-  Settings,
   Edit,
   Mail,
-  Building,
-  CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";

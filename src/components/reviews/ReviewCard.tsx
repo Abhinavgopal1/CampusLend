@@ -4,7 +4,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { StarRating } from "@/components/ui/StarRating";
 import { formatDate } from "@/lib/utils";
 import type { MockReview } from "@/lib/mockData";
-import { ThumbsUp, MessageSquare } from "lucide-react";
+import { ThumbsUp } from "lucide-react";
 import { useState } from "react";
 
 export function ReviewCard({ review }: { review: MockReview }) {

@@ -1,7 +1,7 @@
 "use client";
 
-import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
+import { CHAT_PRIVACY_NOTICE } from "@/lib/chatSafety";
 import { useChatStore } from "@/store/useChatStore";
 import {
   Bot,
@@ -22,7 +22,6 @@ export function AIChatbot() {
     isChatOpen,
     chatMessages,
     chatContext,
-    toggleChat,
     closeChat,
     openChat,
     sendMessage,
@@ -191,6 +190,8 @@ export function AIChatbot() {
                 className={`max-w-[80%] rounded-2xl p-3 text-xs leading-relaxed ${
                   isUser
                     ? "bg-blue-600 text-white rounded-tr-xs"
+                    : msg.sender === "system"
+                      ? "border border-red-200 bg-red-50 text-red-800 rounded-tl-xs dark:border-red-900 dark:bg-red-950/30 dark:text-red-200"
                     : "bg-[var(--surface-hover)] text-[var(--text-primary)] border border-[var(--border)] rounded-tl-xs whitespace-pre-line"
                 }`}
               >
@@ -217,26 +218,29 @@ export function AIChatbot() {
       </div>
 
       {/* Input Box */}
-      <form
-        onSubmit={handleSend}
-        className="p-3 border-t border-[var(--border)] bg-[var(--surface)] flex items-center gap-2"
-      >
-        <input
-          type="text"
-          placeholder="Ask a question or describe an issue..."
-          value={inputMessage}
-          onChange={(e) => setInputMessage(e.target.value)}
-          className="flex-1 rounded-xl border border-[var(--border)] bg-[var(--surface-hover)] px-3.5 py-2 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-blue-500 focus:bg-[var(--surface)] transition-all"
-        />
-        <Button
-          type="submit"
-          size="sm"
-          variant="primary"
-          disabled={!inputMessage.trim() || isSending}
-          icon={Send}
-          className="rounded-xl shrink-0"
-        />
-      </form>
+      <div className="border-t border-[var(--border)] bg-[var(--surface)] p-3">
+        <p className="mb-2 text-[9px] font-medium leading-relaxed text-[var(--text-muted)]">
+          {CHAT_PRIVACY_NOTICE}
+        </p>
+        <form onSubmit={handleSend} className="flex items-center gap-2">
+          <input
+            type="text"
+            placeholder="Ask a question without personal details..."
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+            maxLength={500}
+            className="flex-1 rounded-xl border border-[var(--border)] bg-[var(--surface-hover)] px-3.5 py-2 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-blue-500 focus:bg-[var(--surface)] transition-all"
+          />
+          <Button
+            type="submit"
+            size="sm"
+            variant="primary"
+            disabled={!inputMessage.trim() || isSending}
+            icon={Send}
+            className="rounded-xl shrink-0"
+          />
+        </form>
+      </div>
     </div>
   );
 }

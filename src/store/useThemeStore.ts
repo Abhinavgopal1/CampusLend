@@ -43,7 +43,7 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
     if (typeof window !== "undefined") {
       try {
         localStorage.setItem("campuslend-theme", theme);
-      } catch (e) {
+      } catch {
         // LocalStorage fallback
       }
     }
