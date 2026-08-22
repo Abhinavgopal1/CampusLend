@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import { CATEGORIES, ITEM_CONDITIONS } from "@/lib/constants";
 import { formatPrice } from "@/lib/utils";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useItemStore } from "@/store/useItemStore";
 import {
   Upload,
   Sparkles,
@@ -19,11 +21,11 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function ListItemPage() {
-  const router = useRouter();
+  const { user } = useAuthStore();
+  const { addItem } = useItemStore();
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
 
   // Form State
@@ -45,6 +47,7 @@ export default function ListItemPage() {
 
   const [isPublishing, setIsPublishing] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
+  const [publishedItemId, setPublishedItemId] = useState<string | null>(null);
 
   const samplePhotoPresets = [
     "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800",
@@ -64,8 +67,23 @@ export default function ListItemPage() {
   };
 
   const handlePublish = async () => {
+    if (!formData.title.trim() || !formData.description.trim() || images.length === 0) {
+      setStep(formData.title.trim() && formData.description.trim() ? 1 : 2);
+      return;
+    }
     setIsPublishing(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 650));
+    const item = addItem({
+      ...formData,
+      images,
+      availability: "available",
+      ownerId: user?.id || "demo-user",
+      ownerName: user?.name || "CampusLend Student",
+      ownerAvatar: user?.avatar || "",
+      ownerRating: user?.rating || 5,
+      ownerVerified: user?.verified ?? true,
+    });
+    setPublishedItemId(item.id);
     setIsPublishing(false);
     setIsPublished(true);
   };
@@ -87,9 +105,9 @@ export default function ListItemPage() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 pt-4">
-          <Link href="/dashboard" className="flex-1">
+          <Link href={publishedItemId ? `/items/${publishedItemId}` : "/dashboard"} className="flex-1">
             <Button size="md" variant="accent" className="w-full text-xs font-bold">
-              Manage in Dashboard
+              View Live Listing
             </Button>
           </Link>
           <Link href="/" className="flex-1">

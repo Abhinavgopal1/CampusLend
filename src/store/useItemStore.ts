@@ -3,6 +3,7 @@
 // ============================================================
 
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 import { MOCK_ITEMS, type MockItem } from "@/lib/mockData";
 
 interface ItemFilters {
@@ -26,6 +27,8 @@ interface ItemState {
   setFilter: (key: keyof ItemFilters, value: string | number) => void;
   resetFilters: () => void;
   toggleSaved: (itemId: string) => void;
+  addItem: (item: Omit<MockItem, "id" | "createdAt" | "views" | "savedCount">) => MockItem;
+  setItemAvailability: (itemId: string, availability: MockItem["availability"]) => void;
   setViewMode: (mode: "grid" | "list") => void;
   getFilteredItems: () => MockItem[];
   getItemById: (id: string) => MockItem | undefined;
@@ -44,7 +47,7 @@ const defaultFilters: ItemFilters = {
   sortBy: "newest",
 };
 
-export const useItemStore = create<ItemState>((set, get) => ({
+export const useItemStore = create<ItemState>()(persist((set, get) => ({
   items: MOCK_ITEMS,
   filters: defaultFilters,
   savedItems: new Set(["i1", "i5", "i8"]), // Some pre-saved for demo
@@ -71,6 +74,26 @@ export const useItemStore = create<ItemState>((set, get) => ({
       }
       return { savedItems: newSaved };
     });
+  },
+
+  addItem: (item) => {
+    const newItem: MockItem = {
+      ...item,
+      id: `item-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      views: 0,
+      savedCount: 0,
+    };
+    set((state) => ({ items: [newItem, ...state.items] }));
+    return newItem;
+  },
+
+  setItemAvailability: (itemId, availability) => {
+    set((state) => ({
+      items: state.items.map((item) =>
+        item.id === itemId ? { ...item, availability } : item
+      ),
+    }));
   },
 
   setViewMode: (mode) => {
@@ -164,4 +187,9 @@ export const useItemStore = create<ItemState>((set, get) => ({
       )
       .slice(0, 8);
   },
-}));
+}), {
+    name: "campuslend-marketplace",
+    storage: createJSONStorage(() => localStorage),
+    partialize: (state) => ({ items: state.items }),
+  }
+));

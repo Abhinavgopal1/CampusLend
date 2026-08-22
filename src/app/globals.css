@@ -33,6 +33,7 @@
 
   /* Neutral */
   --surface: #ffffff;
+  --page-bg: #f6f7fb;
   --surface-hover: #f8fafc;
   --surface-elevated: #ffffff;
   --surface-overlay: rgba(0, 0, 0, 0.5);
@@ -77,6 +78,7 @@
 
 .dark {
   --surface: #0b1120;
+  --page-bg: #070b14;
   --surface-hover: #131c31;
   --surface-elevated: #182238;
   --surface-overlay: rgba(0, 0, 0, 0.8);
@@ -134,12 +136,27 @@ html {
 }
 
 body {
-  background: var(--surface);
+  background:
+    radial-gradient(circle at 12% -10%, rgba(37, 99, 235, 0.10), transparent 30rem),
+    radial-gradient(circle at 92% 4%, rgba(16, 185, 129, 0.08), transparent 26rem),
+    var(--page-bg);
   color: var(--text-primary);
   font-family: "Inter", "Outfit", system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  outline-offset: 3px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary-500);
 }
 
 /* ---- Utility Classes ---- */
@@ -157,6 +174,21 @@ body {
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
+}
+
+.premium-card {
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  box-shadow: 0 18px 50px -32px rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(18px);
+}
+
+.trust-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: linear-gradient(to bottom, black, transparent 86%);
 }
 
 .gradient-text {
@@ -307,6 +339,15 @@ body {
 .hover-lift:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-xl);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .hover-scale {

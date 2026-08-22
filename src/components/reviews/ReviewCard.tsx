@@ -58,7 +58,7 @@ export function ReviewCard({ review }: { review: MockReview }) {
 
       {/* Review Text */}
       <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
-        "{review.comment}"
+        &ldquo;{review.comment}&rdquo;
       </p>
 
       {/* Helpful button */}

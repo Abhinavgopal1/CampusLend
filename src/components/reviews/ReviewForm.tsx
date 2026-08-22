@@ -63,7 +63,7 @@ export function ReviewForm({
           Rate & Review Rental
         </h4>
         <p className="text-xs text-[var(--text-muted)] mt-0.5">
-          Share your experience renting "{itemTitle}"
+          Share your experience renting &ldquo;{itemTitle}&rdquo;
         </p>
       </div>
 

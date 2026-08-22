@@ -105,7 +105,7 @@ export default function LoginPage() {
         </form>
 
         <p className="text-center text-xs text-[var(--text-muted)]">
-          Don't have an account yet?{" "}
+          Don&apos;t have an account yet?{" "}
           <Link href="/register" className="font-bold text-blue-600 hover:underline">
             Register with College ID
           </Link>

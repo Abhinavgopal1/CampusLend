@@ -3,7 +3,10 @@
 // ============================================================
 
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 import { MOCK_RENTALS, type MockRental } from "@/lib/mockData";
+
+type BookingDetails = Omit<MockRental, "id" | "status">;
 
 interface RentalState {
   rentals: MockRental[];
@@ -27,11 +30,12 @@ interface RentalState {
   startBooking: (itemId: string) => void;
   setBookingDates: (start: string, end: string) => void;
   setBookingStep: (step: number) => void;
-  confirmBooking: () => Promise<void>;
+  confirmBooking: (details: BookingDetails) => Promise<MockRental>;
   cancelBooking: () => void;
+  updateRentalStatus: (id: string, status: MockRental["status"]) => void;
 }
 
-export const useRentalStore = create<RentalState>((set, get) => ({
+export const useRentalStore = create<RentalState>()(persist((set, get) => ({
   rentals: MOCK_RENTALS,
   isLoading: false,
   bookingItemId: null,
@@ -82,11 +86,20 @@ export const useRentalStore = create<RentalState>((set, get) => ({
     set({ bookingStep: step });
   },
 
-  confirmBooking: async () => {
+  confirmBooking: async (details) => {
     set({ isLoading: true });
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    // In production, this would create a real rental
-    set({ isLoading: false, bookingStep: 3 });
+    await new Promise((resolve) => setTimeout(resolve, 900));
+    const rental: MockRental = {
+      ...details,
+      id: `rental-${Date.now()}`,
+      status: "pending",
+    };
+    set((state) => ({
+      rentals: [rental, ...state.rentals],
+      isLoading: false,
+      bookingStep: 3,
+    }));
+    return rental;
   },
 
   cancelBooking: () => {
@@ -97,4 +110,16 @@ export const useRentalStore = create<RentalState>((set, get) => ({
       bookingStep: 0,
     });
   },
+
+  updateRentalStatus: (id, status) => {
+    set((state) => ({
+      rentals: state.rentals.map((rental) =>
+        rental.id === id ? { ...rental, status } : rental
+      ),
+    }));
+  },
+}), {
+  name: "campuslend-rentals",
+  storage: createJSONStorage(() => localStorage),
+  partialize: (state) => ({ rentals: state.rentals }),
 }));

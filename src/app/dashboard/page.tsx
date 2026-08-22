@@ -4,9 +4,10 @@ import { RentalCard } from "@/components/rentals/RentalCard";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { formatPrice } from "@/lib/utils";
-import { MOCK_ITEMS, MOCK_RENTALS, type MockRental } from "@/lib/mockData";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useChatStore } from "@/store/useChatStore";
+import { useItemStore } from "@/store/useItemStore";
+import { useRentalStore } from "@/store/useRentalStore";
 import {
   Clock,
   CheckCircle2,
@@ -21,6 +22,7 @@ import {
   Pause,
   Trash2,
   SlidersHorizontal,
+  ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -28,36 +30,29 @@ import { useState } from "react";
 export default function DashboardPage() {
   const { user } = useAuthStore();
   const { openChat } = useChatStore();
+  const { items, setItemAvailability } = useItemStore();
+  const { rentals, updateRentalStatus } = useRentalStore();
 
   const [activeTab, setActiveTab] = useState<
     "active" | "overdue" | "upcoming" | "completed" | "my-listings"
   >("active");
 
-  const [rentals, setRentals] = useState<MockRental[]>(MOCK_RENTALS);
-  const [myListings, setMyListings] = useState(MOCK_ITEMS.slice(0, 3));
+  const myListings = items.filter((item) => item.ownerId === user?.id);
 
   const activeRentals = rentals.filter((r) => r.status === "active");
+  const pendingRentals = rentals.filter((r) => r.status === "pending");
   const overdueRentals = rentals.filter((r) => r.status === "overdue");
   const completedRentals = rentals.filter((r) => r.status === "completed");
 
   const handleReturnItem = (id: string) => {
-    setRentals((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status: "completed" as const } : r))
-    );
+    updateRentalStatus(id, "completed");
   };
 
   const handleTogglePause = (id: string) => {
-    setMyListings((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              availability:
-                item.availability === "available" ? "paused" : "available",
-            }
-          : item
-      )
-    );
+    const item = items.find((listing) => listing.id === id);
+    if (item) {
+      setItemAvailability(id, item.availability === "available" ? "paused" : "available");
+    }
   };
 
   return (
@@ -157,13 +152,14 @@ export default function DashboardPage() {
       <div className="flex gap-2 overflow-x-auto pb-1 border-b border-[var(--border)] no-scrollbar">
         {[
           { id: "active", label: "Active Rentals", count: activeRentals.length },
+          { id: "upcoming", label: "Awaiting Handoff", count: pendingRentals.length },
           { id: "overdue", label: "Overdue Items", count: overdueRentals.length, alert: overdueRentals.length > 0 },
           { id: "completed", label: "History & Completed", count: completedRentals.length },
           { id: "my-listings", label: "My Listings Management", count: myListings.length },
         ].map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
+            onClick={() => setActiveTab(tab.id as typeof activeTab)}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all ${
               activeTab === tab.id
                 ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
@@ -220,6 +216,22 @@ export default function DashboardPage() {
               {overdueRentals.map((r) => (
                 <RentalCard key={r.id} rental={r} onReturnItem={handleReturnItem} />
               ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === "upcoming" && (
+        <div className="space-y-4">
+          {pendingRentals.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-[var(--border)] p-10 text-center space-y-2">
+              <ShieldCheck className="h-8 w-8 text-blue-600 mx-auto" />
+              <p className="text-sm font-bold text-[var(--text-primary)]">No handoffs waiting</p>
+              <p className="text-xs text-[var(--text-muted)]">New bookings appear here until both students verify the exchange.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {pendingRentals.map((r) => <RentalCard key={r.id} rental={r} />)}
             </div>
           )}
         </div>

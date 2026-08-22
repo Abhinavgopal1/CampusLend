@@ -58,7 +58,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-screen bg-[var(--surface)] text-[var(--text-primary)] antialiased selection:bg-blue-500/20 selection:text-blue-700">
+      <body className="min-h-screen bg-[var(--page-bg)] text-[var(--text-primary)] antialiased selection:bg-blue-500/20 selection:text-blue-700">
         <div className="flex min-h-screen flex-col">
           <TopNav />
           <div className="flex-1 pb-20 lg:pb-10">{children}</div>

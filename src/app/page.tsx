@@ -20,6 +20,10 @@ import {
   Award,
   Users,
   Lock,
+  Camera,
+  CheckCircle2,
+  Fingerprint,
+  ScanLine,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -51,55 +55,69 @@ export default function HomePage() {
         {/* Main Content Area */}
         <div className="flex-1 space-y-10 min-w-0">
           {/* Hero Section */}
-          <section className="relative overflow-hidden rounded-3xl gradient-hero text-white p-6 sm:p-10 shadow-2xl">
-            {/* Background Glows */}
-            <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl" />
-            <div className="absolute -left-16 -bottom-16 h-64 w-64 rounded-full bg-blue-400/20 blur-3xl" />
+          <section className="relative overflow-hidden rounded-[2rem] bg-[#07111f] text-white shadow-2xl shadow-slate-950/20">
+            <div className="trust-grid absolute inset-0" />
+            <div className="absolute -right-16 -top-20 h-72 w-72 rounded-full bg-emerald-400/20 blur-3xl" />
+            <div className="absolute -bottom-28 left-1/3 h-80 w-80 rounded-full bg-blue-600/25 blur-3xl" />
 
-            <div className="relative z-10 max-w-2xl space-y-4">
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md px-3.5 py-1 text-xs font-semibold text-emerald-300 border border-white/15">
-                <Sparkles className="h-3.5 w-3.5 animate-spin-slow text-amber-300" />
-                <span>Hyperlocal Campus Marketplace • BML Munjal University</span>
+            <div className="relative grid gap-10 p-6 sm:p-10 lg:grid-cols-[1.15fr_0.85fr] lg:p-12">
+              <div className="flex flex-col justify-center">
+                <div className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3.5 py-1.5 text-[11px] font-black uppercase tracking-[0.13em] text-emerald-300">
+                  <ShieldCheck className="h-3.5 w-3.5" /> Verified BMU students only
+                </div>
+
+                <h1 className="mt-6 max-w-3xl text-4xl font-black leading-[0.98] tracking-[-0.045em] sm:text-5xl lg:text-6xl">
+                  Your campus has everything you need.
+                  <span className="mt-2 block bg-gradient-to-r from-emerald-300 via-cyan-300 to-blue-400 bg-clip-text text-transparent">Borrow it, safely.</span>
+                </h1>
+
+                <p className="mt-5 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
+                  Find gear in minutes, negotiate a fair price, and exchange it through a two-party condition check that protects both students.
+                </p>
+
+                <form onSubmit={handleHeroSearch} className="mt-7 flex max-w-xl flex-col gap-2 rounded-3xl border border-white/10 bg-white/7 p-2 backdrop-blur sm:flex-row">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <input type="text" placeholder="What do you need today?" value={searchInput} onChange={(e) => setSearchInput(e.target.value)} className="w-full rounded-2xl bg-white px-10 py-3 text-sm font-semibold text-slate-950 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+                  </div>
+                  <Button type="submit" variant="accent" size="lg" className="rounded-2xl shrink-0">Search campus</Button>
+                </form>
+
+                <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs font-medium text-slate-400">
+                  <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> No listing fee</span>
+                  <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Condition proof</span>
+                  <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Campus-only meetups</span>
+                </div>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-tight">
-                Borrow Anything on Campus in <span className="text-emerald-400">Minutes</span>.
-              </h1>
-
-              <p className="text-sm sm:text-base text-slate-200 leading-relaxed">
-                Rent cameras, laptops, sports gear, books, and hostel gear from verified students with AI dispute recovery and secure deposit escrow.
-              </p>
-
-              {/* Quick Search on Mobile / Hero */}
-              <form onSubmit={handleHeroSearch} className="pt-2 flex flex-col sm:flex-row gap-2 max-w-lg">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <input
-                    type="text"
-                    placeholder="Search for MacBook, suit, books..."
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                    className="w-full rounded-2xl bg-white/95 text-slate-900 placeholder:text-slate-500 pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 font-medium"
-                  />
+              <div className="relative hidden min-h-[430px] lg:block">
+                <div className="absolute left-6 top-1/2 w-[88%] -translate-y-1/2 rotate-2 rounded-[2rem] border border-white/15 bg-white/8 p-5 shadow-2xl backdrop-blur-xl">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-300">CampusTrust handoff</p>
+                      <p className="mt-1 text-sm font-bold">MacBook Pro 14&quot; M3</p>
+                    </div>
+                    <Badge variant="success" size="sm">Live</Badge>
+                  </div>
+                  <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=900" alt="MacBook available to rent" className="mt-4 aspect-[16/9] w-full rounded-3xl object-cover" />
+                  <div className="mt-4 grid grid-cols-3 gap-2">
+                    {[{ icon: Camera, label: "Photo proof", done: true }, { icon: Fingerprint, label: "Code match", done: true }, { icon: ScanLine, label: "Ready", done: false }].map(({ icon: Icon, label, done }) => (
+                      <div key={label} className={`rounded-2xl border p-3 ${done ? "border-emerald-300/20 bg-emerald-300/10" : "border-blue-300/20 bg-blue-300/10"}`}>
+                        <Icon className={`h-4 w-4 ${done ? "text-emerald-300" : "text-blue-300"}`} />
+                        <p className="mt-2 text-[10px] font-bold text-slate-200">{label}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-4 flex items-center justify-between rounded-2xl bg-black/20 px-4 py-3">
+                    <div><p className="text-[10px] text-slate-400">Deposit protected</p><p className="text-sm font-black">₹5,000</p></div>
+                    <div className="flex -space-x-2"><div className="h-9 w-9 rounded-full border-2 border-slate-900 bg-blue-500" /><div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-slate-900 bg-emerald-500 text-[10px] font-black">AI</div></div>
+                  </div>
                 </div>
-                <Button type="submit" variant="accent" size="lg" className="rounded-2xl shrink-0">
-                  Find Gear
-                </Button>
-              </form>
-
-              {/* Trust Micro-Badges */}
-              <div className="pt-3 flex flex-wrap items-center gap-4 text-xs text-slate-300">
-                <div className="flex items-center gap-1.5">
-                  <ShieldCheck className="h-4 w-4 text-emerald-400" />
-                  <span>College ID Verified</span>
+                <div className="absolute right-0 top-6 rounded-2xl border border-white/15 bg-slate-900/80 px-4 py-3 shadow-xl backdrop-blur animate-float">
+                  <p className="text-[10px] text-slate-400">Average response</p><p className="mt-1 text-sm font-black text-emerald-300">12 minutes</p>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Lock className="h-4 w-4 text-emerald-400" />
-                  <span>Deposit Protected</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Sparkles className="h-4 w-4 text-emerald-400" />
-                  <span>AI Damage Mediation</span>
+                <div className="absolute bottom-4 left-0 rounded-2xl border border-white/15 bg-slate-900/80 px-4 py-3 shadow-xl backdrop-blur">
+                  <p className="text-[10px] text-slate-400">Students protected</p><p className="mt-1 text-sm font-black">1,240+</p>
                 </div>
               </div>
             </div>
@@ -259,7 +277,7 @@ export default function HomePage() {
                   Return & Auto-Refund
                 </h4>
                 <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                  Hand back the item on time. Deposit is released automatically, and rate your peer's trust score.
+                  Hand back the item on time. Deposit is released automatically, and rate your peer&apos;s trust score.
                 </p>
               </div>
             </div>

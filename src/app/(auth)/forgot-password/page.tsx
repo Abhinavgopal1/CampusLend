@@ -37,7 +37,7 @@ export default function ForgotPasswordPage() {
                 Reset Link Sent!
               </h3>
               <p className="text-xs text-[var(--text-muted)]">
-                We've sent a password reset link to <span className="font-bold">{email}</span>.
+                We&apos;ve sent a password reset link to <span className="font-bold">{email}</span>.
               </p>
               <Link href="/login" className="block pt-2">
                 <Button size="md" variant="primary" className="w-full text-xs">
