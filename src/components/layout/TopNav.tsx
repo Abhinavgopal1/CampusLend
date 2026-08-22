@@ -56,9 +56,6 @@ export function TopNav() {
                 <span className="text-lg font-black tracking-tight text-[var(--text-primary)]">
                   CampusLend
                 </span>
-                <span className="rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                  AI
-                </span>
               </div>
               <p className="text-[11px] font-medium text-[var(--text-muted)] -mt-1">
                 BML Munjal University Campus Hub
