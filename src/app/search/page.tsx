@@ -222,7 +222,7 @@ export default function SearchPage() {
               </label>
               <select
                 value={filters.sortBy}
-                onChange={(e) => setFilter("sortBy", e.target.value as any)}
+                onChange={(e) => setFilter("sortBy", e.target.value as "newest" | "price-low" | "price-high" | "rating")}
                 className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-hover)] px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none focus:border-blue-500 font-medium"
               >
                 <option value="newest">Recently Listed</option>
@@ -242,7 +242,7 @@ export default function SearchPage() {
               <span className="text-xs text-[var(--text-muted)] font-medium">Applied:</span>
               {filters.search && (
                 <Badge variant="primary" size="sm" className="gap-1">
-                  "{filters.search}"
+                  &ldquo;{filters.search}&rdquo;
                   <button onClick={() => setFilter("search", "")}>
                     <X className="h-3 w-3" />
                   </button>

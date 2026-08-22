@@ -2,8 +2,8 @@
 
 import { useThemeStore, type ThemeMode } from "@/store/useThemeStore";
 import { cn } from "@/lib/utils";
-import { Sun, Moon, Laptop, Sparkles } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Sun, Moon, Laptop } from "lucide-react";
+import { useSyncExternalStore } from "react";
 
 export interface ThemeSwitcherProps {
   variant?: "toggle" | "segmented" | "dropdown";
@@ -15,11 +15,11 @@ export function ThemeSwitcher({
   className,
 }: ThemeSwitcherProps) {
   const { theme, resolvedTheme, setTheme, toggleTheme } = useThemeStore();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(
+    () => () => undefined,
+    () => true,
+    () => false
+  );
 
   if (!mounted) {
     // Avoid hydration mismatch placeholder

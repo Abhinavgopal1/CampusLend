@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   AlertCircle,
   MessageCircle,
+  ScanLine,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -105,15 +106,11 @@ export function RentalCard({
                 Report Issue
               </Button>
             </Link>
-            <Button
-              size="sm"
-              variant="accent"
-              icon={RotateCcw}
-              onClick={() => onReturnItem?.(rental.id)}
-              className="text-xs h-8"
-            >
-              Confirm Return
-            </Button>
+            <Link href={`/handoff/${rental.id}`}>
+              <Button size="sm" variant="accent" icon={ScanLine} className="text-xs h-8">
+                Secure Return
+              </Button>
+            </Link>
           </>
         )}
 
@@ -129,16 +126,20 @@ export function RentalCard({
                 Late Fee Help
               </Button>
             </Link>
-            <Button
-              size="sm"
-              variant="danger"
-              icon={RotateCcw}
-              onClick={() => onReturnItem?.(rental.id)}
-              className="text-xs h-8"
-            >
-              Return Now
-            </Button>
+            <Link href={`/handoff/${rental.id}`}>
+              <Button size="sm" variant="danger" icon={ScanLine} className="text-xs h-8">
+                Verify Return
+              </Button>
+            </Link>
           </>
+        )}
+
+        {rental.status === "pending" && (
+          <Link href={`/handoff/${rental.id}`}>
+            <Button size="sm" variant="accent" icon={ScanLine} className="text-xs h-8">
+              Start Secure Handoff
+            </Button>
+          </Link>
         )}
 
         {rental.status === "completed" && (

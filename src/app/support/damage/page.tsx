@@ -73,7 +73,7 @@ export default function DamageRecoveryPage() {
                 <button
                   key={t.id}
                   type="button"
-                  onClick={() => setDamageType(t.id as any)}
+                  onClick={() => setDamageType(t.id as "cosmetic" | "functional" | "missing")}
                   className={`p-4 rounded-2xl border text-left transition-all ${
                     damageType === t.id
                       ? "border-amber-500 bg-amber-50/50 dark:bg-amber-950/30 ring-2 ring-amber-500/20"

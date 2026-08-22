@@ -18,6 +18,8 @@ import {
   GraduationCap,
   MessageSquare,
   ShieldAlert,
+  Compass,
+  LayoutDashboard,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -62,6 +64,14 @@ export function TopNav() {
               </p>
             </div>
           </Link>
+          <nav className="hidden xl:flex items-center gap-1 rounded-xl bg-[var(--surface-hover)] p-1 border border-[var(--border)]">
+            <Link href="/search" className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-bold text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-blue-600 transition-colors">
+              <Compass className="h-3.5 w-3.5" /> Explore
+            </Link>
+            <Link href="/dashboard" className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-bold text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-blue-600 transition-colors">
+              <LayoutDashboard className="h-3.5 w-3.5" /> Dashboard
+            </Link>
+          </nav>
         </div>
 
         {/* Global Search Bar */}
@@ -140,7 +150,7 @@ export function TopNav() {
                       🎉 Offer Accepted!
                     </p>
                     <p className="text-xs text-[var(--text-secondary)]">
-                      Your offer for MacBook Pro 14" was accepted by seller.
+                      Your offer for MacBook Pro 14&quot; was accepted by seller.
                     </p>
                     <p className="text-[10px] text-[var(--text-muted)]">10m ago</p>
                   </div>

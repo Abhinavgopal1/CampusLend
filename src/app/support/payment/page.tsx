@@ -88,7 +88,7 @@ export default function PaymentSupportPage() {
                 <button
                   key={topic.id}
                   type="button"
-                  onClick={() => setSelectedTopic(topic.id as any)}
+                  onClick={() => setSelectedTopic(topic.id as "deposit" | "refund" | "late_fee" | "failed")}
                   className={`w-full p-3 rounded-2xl border text-left transition-all ${
                     selectedTopic === topic.id
                       ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/30 ring-2 ring-emerald-500/20"
@@ -114,7 +114,7 @@ export default function PaymentSupportPage() {
               {formatPrice(5000)}
             </p>
             <p className="text-[11px] text-emerald-800/80 dark:text-emerald-300/80 leading-relaxed">
-              Locked for MacBook Pro 14" rental. Releases upon lender hand-in confirmation.
+              Locked for MacBook Pro 14&quot; rental. Releases upon lender hand-in confirmation.
             </p>
           </div>
 

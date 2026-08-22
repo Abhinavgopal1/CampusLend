@@ -5,8 +5,9 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { PricingBreakdown } from "@/components/items/PricingBreakdown";
 import { calculateRentalCost, formatDate, formatPrice } from "@/lib/utils";
-import { MOCK_ITEMS } from "@/lib/mockData";
 import { useItemStore } from "@/store/useItemStore";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useRentalStore } from "@/store/useRentalStore";
 import {
   Calendar,
   CheckCircle2,
@@ -19,28 +20,43 @@ import {
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export default function BookingPage() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const router = useRouter();
   const id = params?.id as string;
 
-  const { getItemById } = useItemStore();
-  const item = getItemById(id) || MOCK_ITEMS[0];
+  const { getItemById, setItemAvailability } = useItemStore();
+  const { user } = useAuthStore();
+  const { confirmBooking } = useRentalStore();
+  const item = getItemById(id);
 
   const initialDays = Number(searchParams.get("days")) || 3;
   const discountedPrice = Number(searchParams.get("discountedPrice"));
 
-  const dailyPrice = discountedPrice || item.dailyPrice;
   const [days, setDays] = useState(initialDays);
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [paymentMethod, setPaymentMethod] = useState<"upi" | "card" | "netbanking">("upi");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [rentalId, setRentalId] = useState<string | null>(null);
 
-  const { subtotal, platformFee, deposit, total } = calculateRentalCost(
+  if (!item) {
+    return (
+      <main className="mx-auto max-w-xl px-4 py-24 text-center space-y-4">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-amber-500/10 text-amber-600">
+          <ShieldCheck className="h-8 w-8" />
+        </div>
+        <h1 className="text-2xl font-black text-[var(--text-primary)]">This listing is no longer available</h1>
+        <p className="text-sm text-[var(--text-secondary)]">It may have been removed or the link is incorrect.</p>
+        <Link href="/search"><Button variant="primary">Browse available gear</Button></Link>
+      </main>
+    );
+  }
+
+  const dailyPrice = discountedPrice || item.dailyPrice;
+  const { deposit, total } = calculateRentalCost(
     dailyPrice,
     days,
     item.deposit
@@ -51,7 +67,21 @@ export default function BookingPage() {
 
   const handlePayAndConfirm = async () => {
     setIsProcessing(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    const rental = await confirmBooking({
+      itemId: item.id,
+      itemTitle: item.title,
+      itemImage: item.images[0],
+      borrowerId: user?.id || "demo-user",
+      lenderId: item.ownerId,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      dailyRate: dailyPrice,
+      totalCost: total,
+      deposit: item.deposit,
+      hourlyLateFee: item.hourlyLateFee,
+    });
+    setItemAvailability(item.id, "rented");
+    setRentalId(rental.id);
     setIsProcessing(false);
     setStep(3);
   };
@@ -106,7 +136,7 @@ export default function BookingPage() {
                     Choose Rental Duration
                   </h2>
                   <p className="text-xs text-[var(--text-muted)]">
-                    Select how many days you'll need the item
+                    Select how many days you&apos;ll need the item
                   </p>
                 </div>
 
@@ -332,7 +362,7 @@ export default function BookingPage() {
             <div className="flex justify-between">
               <span className="text-[var(--text-muted)]">Booking Reference:</span>
               <span className="font-mono font-bold text-[var(--text-primary)]">
-                #CL-{Math.floor(Math.random() * 900000 + 100000)}
+                #CL-{(rentalId || item.id).replace(/\D/g, "").slice(-6).padStart(6, "0")}
               </span>
             </div>
             <div className="flex justify-between">
@@ -350,9 +380,9 @@ export default function BookingPage() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
-            <Link href="/dashboard" className="flex-1">
+            <Link href={rentalId ? `/handoff/${rentalId}` : "/dashboard"} className="flex-1">
               <Button size="md" variant="accent" className="w-full text-xs font-bold">
-                View in Rental Dashboard
+                Start Secure Handoff
               </Button>
             </Link>
             <Link href="/" className="flex-1">
